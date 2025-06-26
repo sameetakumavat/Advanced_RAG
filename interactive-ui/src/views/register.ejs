@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Advanced RAG System</title>
+    
+    <!-- Favicon for branding -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+    
+    <!-- Meta tags for SEO and social sharing -->
+    <meta name="description" content="Create an account for Advanced RAG System - AI-powered document analysis and question answering">
+    <meta name="keywords" content="RAG, AI, registration, signup, document analysis, machine learning">
+    <meta property="og:title" content="Advanced RAG System - Create Account">
+    <meta property="og:description" content="Join the AI-powered document analysis platform">
+    <meta property="og:type" content="website">
+    
+    <!-- Preconnect to external resources for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Main container with centering -->
+    <div class="container">
+        <!-- Authentication card with glass morphism effect -->
+        <div class="auth-card">
+            <!-- Header section with branding -->
+            <div class="auth-header">
+                <h1>🚀 Join Advanced RAG</h1>
+                <p>Create your account to start analyzing documents with AI</p>
+            </div>
+            
+            <!-- Registration form -->
+            <form class="auth-form" id="registerForm" method="POST">
+                <!-- Username input field -->
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="Choose a unique username"
+                        required
+                        autocomplete="username"
+                        spellcheck="false"
+                        minlength="3"
+                    >
+                </div>
+                
+                <!-- Email input field -->
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="Enter your email address"
+                        required
+                        autocomplete="email"
+                        spellcheck="false"
+                    >
+                </div>
+                
+                <!-- Password input field -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Create a strong password"
+                        required
+                        autocomplete="new-password"
+                        minlength="6"
+                    >
+                </div>
+                
+                <!-- Register button -->
+                <button type="submit" class="btn-primary">
+                    Create Account
+                </button>
+            </form>
+            
+            <!-- Navigation links to other auth pages -->
+            <div class="auth-links">
+                <a href="/login" class="auth-link">
+                    👤 Already have an account? Sign in
+                </a>
+                <a href="/forgot-password" class="auth-link">
+                    🔐 Forgot your password? Reset it
+                </a>
+            </div>
+            
+            <!-- Footer with branding -->
+            <div class="auth-footer">
+                <p>Advanced RAG System</p>
+                <div class="tech-badge">
+                    AI-Powered Document Analysis
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Interactive JavaScript -->
+    <!-- Interactive JavaScript -->
+    <script>
+        // Simple toast function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function showMessage(message, type = 'info') {
+            showToast(message, type);
+        }
+    </script>
+    <script src="/js/auth.js"></script>
+    
+    <!-- Additional registration-specific JavaScript -->
+    <script>
+        // Registration page specific functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus on username field when page loads
+            const usernameField = document.getElementById('username');
+            if (usernameField) {
+                usernameField.focus();
+            }
+            
+            // Add real-time username availability check (placeholder)
+            const username = document.getElementById('username');
+            username.addEventListener('input', debounce(function() {
+                const value = this.value.trim();
+                if (value.length >= 3) {
+                    // TODO: Add real-time username availability check
+                    console.log('Checking username availability:', value);
+                }
+            }, 500));
+            
+            // Add email validation
+            const email = document.getElementById('email');
+            email.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value) {
+                    validateEmailFormat(value);
+                }
+            });
+            
+            // Add password strength indicator
+            const password = document.getElementById('password');
+            password.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+            });
+            
+            // Handle registration form submission
+            const form = document.getElementById('registerForm');
+            form.addEventListener('submit', function(e) {
+                console.log('📝 Registration attempt initiated');
+                
+                // Additional client-side validation can be added here
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                
+                // Check for strong password
+                if (!isPasswordStrong(data.password)) {
+                    e.preventDefault();
+                    showMessage('Please choose a stronger password (at least 6 characters)', 'error');
+                    return;
+                }
+            });
+        });
+        
+        // Utility function for debouncing
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Email format validation
+        function validateEmailFormat(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValid = emailRegex.test(email);
+            
+            const emailField = document.getElementById('email');
+            if (isValid) {
+                emailField.classList.add('valid');
+                emailField.classList.remove('invalid');
+            } else {
+                emailField.classList.add('invalid');
+                emailField.classList.remove('valid');
+                showFieldError(emailField, 'Please enter a valid email address');
+            }
+        }
+        
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            const passwordField = document.getElementById('password');
+            const strength = calculatePasswordStrength(password);
+            
+            // Remove existing strength indicator
+            const existingIndicator = passwordField.parentNode.querySelector('.password-strength');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            if (password.length > 0) {
+                // Create strength indicator
+                const strengthIndicator = document.createElement('div');
+                strengthIndicator.className = 'password-strength';
+                strengthIndicator.innerHTML = `
+                    <div class="strength-bar">
+                        <div class="strength-fill strength-${strength.level}"></div>
+                    </div>
+                    <div class="strength-text">${strength.text}</div>
+                `;
+                
+                strengthIndicator.style.cssText = `
+                    margin-top: 8px;
+                    font-size: 12px;
+                `;
+                
+                passwordField.parentNode.appendChild(strengthIndicator);
+            }
+        }
+        
+        // Calculate password strength
+        function calculatePasswordStrength(password) {
+            let score = 0;
+            
+            if (password.length >= 6) score += 1;
+            if (password.length >= 8) score += 1;
+            if (/[a-z]/.test(password)) score += 1;
+            if (/[A-Z]/.test(password)) score += 1;
+            if (/[0-9]/.test(password)) score += 1;
+            if (/[^A-Za-z0-9]/.test(password)) score += 1;
+            
+            if (score <= 2) return { level: 'weak', text: 'Weak password' };
+            if (score <= 4) return { level: 'medium', text: 'Medium strength' };
+            return { level: 'strong', text: 'Strong password' };
+        }
+        
+        // Check if password is strong enough
+        function isPasswordStrong(password) {
+            return password.length >= 6;
+        }
+        
+        // Add dynamic styles for password strength indicator
+        const dynamicStyles = document.createElement('style');
+        dynamicStyles.textContent = `
+            .strength-bar {
+                width: 100%;
+                height: 4px;
+                background: var(--border-color);
+                border-radius: 2px;
+                overflow: hidden;
+            }
+            
+            .strength-fill {
+                height: 100%;
+                transition: all 0.3s ease;
+                border-radius: 2px;
+            }
+            
+            .strength-weak { width: 33%; background: var(--danger-color); }
+            .strength-medium { width: 66%; background: var(--accent-color); }
+            .strength-strong { width: 100%; background: var(--secondary-color); }
+            
+            .strength-text {
+                margin-top: 4px;
+                color: var(--text-secondary);
+            }
+        `;
+        document.head.appendChild(dynamicStyles);
+    </script>
+</body>
+</html>

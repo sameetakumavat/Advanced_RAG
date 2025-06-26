@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Advanced RAG System</title>
+    
+    <!-- Favicon for branding -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+    
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="Advanced RAG System Dashboard - AI-powered document analysis and question answering">
+    <meta name="keywords" content="RAG, AI, dashboard, document analysis, machine learning">
+    
+    <!-- Preconnect to external resources for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Dashboard specific styles -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>🤖 Advanced RAG</h1>
+            </div>
+            <div class="nav-user">
+                <span class="welcome-text">Welcome, <span id="username">User</span>!</span>
+                <button class="btn-logout" onclick="handleLogout()">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1>🎯 Control Center</h1>
+            <p>Choose your AI-powered document analysis workflow</p>
+        </div>
+
+        <!-- Main Feature Cards Grid -->
+        <div class="features-grid">
+            
+            <!-- File Management Card -->
+            <div class="feature-card" id="fileManagementCard">
+                <div class="card-icon">📁</div>
+                <h2>Document Management</h2>
+                <p>Upload, organize, and manage your PDF documents for AI analysis</p>
+                <div class="card-actions">
+                    <button class="btn-primary" onclick="navigateToFileManagement()">
+                        Manage Documents
+                    </button>
+                    <div class="card-stats">
+                        <span id="fileCount">0</span> files uploaded
+                    </div>
+                </div>
+            </div>
+
+            <!-- Query Interface Card -->
+            <div class="feature-card" id="queryInterfaceCard">
+                <div class="card-icon">🔍</div>
+                <h2>Query Interface</h2>
+                <p>Ask questions about your documents or search Wikipedia knowledge</p>
+                <div class="card-actions">
+                    <button class="btn-primary" onclick="navigateToQueryInterface()">
+                        Start Querying
+                    </button>
+                    <div class="card-stats">
+                        Single-shot Q&A mode
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Interface Card -->
+            <div class="feature-card" id="chatInterfaceCard">
+                <div class="card-icon">💬</div>
+                <h2>Chat Interface</h2>
+                <p>Have conversational interactions with your documents using AI</p>
+                <div class="card-actions">
+                    <button class="btn-primary" onclick="navigateToChatInterface()">
+                        Start Chatting
+                    </button>
+                    <div class="card-stats">
+                        Conversational AI mode
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Simple utility functions
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#17a2b8'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function showLoading() {
+            let overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            let overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        function navigateWithLoading(url) {
+            showLoading();
+            setTimeout(() => {
+                window.location.href = url;
+            }, 300);
+        }
+
+        // Navigation functions
+        function navigateToFileManagement() {
+            navigateWithLoading('/file-management');
+        }
+
+        function navigateToQueryInterface() {
+            navigateWithLoading('/query-interface');
+        }
+
+        function navigateToChatInterface() {
+            navigateWithLoading('/chat-interface');
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('tokenType');
+                localStorage.removeItem('username');
+                showToast('Logged out successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/login?message=logout';
+                }, 1000);
+            }
+        }
+
+        // Dashboard functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load user data
+            const username = localStorage.getItem('username') || 'User';
+            const usernameElement = document.getElementById('username');
+            if (usernameElement) {
+                usernameElement.textContent = username;
+            }
+
+            // Simple API call to get stats
+            const token = localStorage.getItem('authToken');
+            const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+            
+            if (token) {
+                fetch('/api/dashboard/stats', {
+                    headers: {
+                        'Authorization': `${tokenType} ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const fileCountElement = document.getElementById('fileCount');
+                        if (fileCountElement) {
+                            fileCountElement.textContent = data.data.fileCount || 0;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('Stats loading failed, using defaults');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

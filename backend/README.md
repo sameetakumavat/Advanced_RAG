@@ -2,6 +2,8 @@
 
 This is the backend API for the Advanced RAG (Retrieval-Augmented Generation) system, built with FastAPI, LangChain and LangGraph. It manages authentication, document storage, and AI-powered question answering with citations.
 
+> **Note (June 2025):** The Chat interface and advanced query routing features are still in active development. Core functionality (authentication, file management, dashboard, and basic RAG) is stable and fully implemented.
+
 ## Features
 
 - **RESTful API**: FastAPI-powered endpoints for all operations
@@ -87,10 +89,14 @@ Access the API documentation at http://localhost:8000/docs
 
 ### RAG Operations
 - `POST /chain/initialize`: Initialize RAG resources with selected files
+- `GET /chain/status`: Check RAG system initialization status
 - `POST /chain/ask_documents`: Ask a question using selected documents
 - `POST /chain/ask_wikipedia`: Ask a question using Wikipedia
 - `POST /chain/ask_question`: Ask a question with automatic routing to documents or Wikipedia
 - `POST /chain/ask_rag_agent`: Ask a question using the LangGraph agent
+
+### Dashboard Operations
+- `GET /dashboard/stats`: Get user dashboard statistics (file count, username, etc.)
 
 ### Chat Operations
 - `POST /chat/start`: Start a new chat session
@@ -113,6 +119,7 @@ backend/
 │   ├── auth_route.py          # Authentication routes
 │   ├── chat_route.py          # Chat session routes
 │   ├── file_route.py          # File management routes
+│   ├── dashboard_route.py     # Dashboard stats routes
 │   └── rag_route.py           # RAG/QA routes
 ├── schemas/                   # Pydantic models
 │   ├── auth.py                # Authentication schemas

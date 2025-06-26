@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Management - Advanced RAG System</title>
+    
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/file-management.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>🤖 Advanced RAG</h1>
+            </div>
+            <div class="nav-user">
+                <span class="welcome-text">Welcome, <span id="username">User</span>!</span>
+                <button class="btn-logout" onclick="handleLogout()">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="file-management-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-left">
+                <h1>📁 Document Management</h1>
+                <p>Upload, organize, and manage your PDF documents for AI analysis</p>
+            </div>
+            <div class="header-right">
+                <button class="btn-back" onclick="navigateWithLoading('/dashboard')">
+                    ← Back to Dashboard
+                </button>
+                <button class="btn-primary" onclick="openUploadModal()">
+                    📤 Upload Document
+                </button>
+            </div>
+        </div>
+
+        <!-- File Statistics -->
+        <div class="file-stats">
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-info">
+                    <h3 id="totalFiles">0</h3>
+                    <p>Total Documents</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3 id="selectedFiles">0</h3>
+                    <p>Selected for RAG (Max 3)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <div class="action-left">
+                <input type="text" id="searchInput" placeholder="Search files..." class="search-input">
+            </div>
+            <div class="action-right">
+                <button class="btn-warning" onclick="initializeResources()" id="initializeBtn" disabled>
+                    🚀 Initialize RAG Resources
+                </button>
+                <div class="rag-status" id="ragStatus">
+                    <span class="status-indicator" id="statusIndicator"></span>
+                    <span class="status-text" id="statusText">RAG Status: Unknown</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Files List -->
+        <div class="files-container">
+            <div class="files-list" id="filesList">
+                <!-- Files will be loaded here by JavaScript -->
+                <div class="loading-message">
+                    <div class="loading-spinner"></div>
+                    <p>Loading documents...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📤 Upload Document</h2>
+                <button class="modal-close" onclick="closeUploadModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drag & Drop your PDF files here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+                    <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                        Choose Files
+                    </button>
+                </div>
+                
+                <!-- File Preview List -->
+                <div class="file-preview-container" id="filePreviewContainer" style="display: none;">
+                    <h4>Selected Files:</h4>
+                    <div class="file-preview-list" id="filePreviewList">
+                        <!-- Preview files will appear here -->
+                    </div>
+                    <div class="preview-actions">
+                        <button class="btn-secondary" onclick="clearFileSelection()">
+                            Clear All
+                        </button>
+                        <button class="btn-primary" onclick="uploadSelectedFiles()">
+                            📤 Upload Files
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p id="progressText">Uploading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Details Modal -->
+    <div class="modal" id="fileDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="fileDetailsTitle">📄 File Details</h2>
+                <button class="modal-close highlighted" onclick="closeFileDetailsModal()">×</button>
+            </div>
+            <div class="modal-body" id="fileDetailsContent">
+                <!-- File details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="confirmTitle">Confirm Action</h2>
+                <button class="modal-close" onclick="closeConfirmModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-danger" onclick="confirmAction()" id="confirmBtn">
+                    Confirm
+                </button>
+                <button class="btn-secondary" onclick="closeConfirmModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Global variables
+        let allFiles = [];
+        let selectedFileIds = [];
+        let currentFileId = null;
+        let confirmCallback = null;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Set username
+            const username = localStorage.getItem('username') || 'User';
+            document.getElementById('username').textContent = username;
+
+            // Load files and check RAG status
+            loadFiles();
+            checkRAGStatus();
+
+            // Set up file input handler
+            const fileInput = document.getElementById('fileInput');
+            fileInput.addEventListener('change', handleFileUpload);
+
+            // Set up drag and drop
+            setupDragAndDrop();
+
+            // Set up search
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+        });
+
+        /**
+         * Toast notification system
+         */
+        function showToast(message, type = 'info') {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.toast');
+            existingToasts.forEach(toast => toast.remove());
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <span class="toast-icon">${getToastIcon(type)}</span>
+                    <span class="toast-message">${message}</span>
+                    <button class="toast-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+            `;
+
+            // Add toast styles if not present
+            if (!document.querySelector('#toast-styles')) {
+                const style = document.createElement('style');
+                style.id = 'toast-styles';
+                style.innerHTML = `
+                    .toast {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        min-width: 300px;
+                        padding: 16px;
+                        border-radius: 8px;
+                        color: white;
+                        z-index: 10000;
+                        animation: slideIn 0.3s ease;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    }
+                    .toast-success { background: linear-gradient(135deg, #28a745, #20c997); }
+                    .toast-error { background: linear-gradient(135deg, #dc3545, #e74c3c); }
+                    .toast-warning { background: linear-gradient(135deg, #ffc107, #f39c12); color: #333; }
+                    .toast-info { background: linear-gradient(135deg, #17a2b8, #3498db); }
+                    .toast-content {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    .toast-close {
+                        background: none;
+                        border: none;
+                        color: inherit;
+                        font-size: 18px;
+                        cursor: pointer;
+                        margin-left: auto;
+                    }
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(toast);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast && toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        function getToastIcon(type) {
+            switch(type) {
+                case 'success': return '✅';
+                case 'error': return '❌';
+                case 'warning': return '⚠️';
+                case 'info': return 'ℹ️';
+                default: return 'ℹ️';
+            }
+        }
+
+        /**
+         * Loading and navigation helpers
+         */
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function navigateWithLoading(url) {
+            showLoading();
+            setTimeout(() => {
+                window.location.href = url;
+            }, 300);
+        }
+
+        /**
+         * Authentication helpers
+         */
+        function handleLogout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('username');
+            showToast('Logged out successfully', 'success');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1000);
+        }
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('authToken');
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        /**
+         * File management functions
+         */
+        async function loadFiles() {
+            try {
+                showLoading();
+                const response = await fetch('/api/files/list_all_uploaded_files', {
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                allFiles = data.files || [];
+                renderFiles(allFiles);
+                updateStats();
+                
+            } catch (error) {
+                console.error('Error loading files:', error);
+                showToast('Failed to load files', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderFiles(files) {
+            const container = document.getElementById('filesList');
+            
+            if (files.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📁</div>
+                        <h3>No documents uploaded yet</h3>
+                        <p>Upload your first PDF document to get started</p>
+                        <button class="btn-primary" onclick="openUploadModal()">
+                            📤 Upload Document
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="files-tabs">
+                    ${files.map(file => `
+                        <div class="file-tab ${file.is_selected ? 'selected' : ''}" data-file-id="${file.id}">
+                            <div class="file-select">
+                                <input type="checkbox" 
+                                       ${file.is_selected ? 'checked' : ''} 
+                                       onchange="toggleFileSelection(${file.id})"
+                                       class="file-checkbox">
+                            </div>
+                            <div class="file-info">
+                                <div class="file-name">📄 ${file.filename}</div>
+                                <div class="file-meta">
+                                    <span class="file-date">📅 ${formatDate(file.upload_date)}</span>
+                                    <span class="file-status">${file.is_selected ? '✅ Selected' : '⚪ Not Selected'}</span>
+                                </div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="action-btn view" onclick="showFileDetails(${file.id})" title="View Description">
+                                    📝
+                                </button>
+                                <button class="action-btn download" onclick="downloadFile(${file.id})" title="Download">
+                                    📥
+                                </button>
+                                <button class="action-btn delete" onclick="deleteFileFromList(${file.id})" title="Delete">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function updateStats() {
+            const totalFiles = allFiles.length;
+            const selectedFiles = allFiles.filter(f => f.is_selected).length;
+
+            document.getElementById('totalFiles').textContent = totalFiles;
+            document.getElementById('selectedFiles').textContent = selectedFiles;
+
+            // Update initialize button state - enable only when files are selected
+            const initializeBtn = document.getElementById('initializeBtn');
+            initializeBtn.disabled = selectedFiles === 0;
+        }
+
+        async function toggleFileSelection(fileId) {
+            try {
+                const file = allFiles.find(f => f.id === fileId);
+                if (!file) return;
+
+                // Check selection limit
+                const currentSelected = allFiles.filter(f => f.is_selected).length;
+                if (!file.is_selected && currentSelected >= 3) {
+                    showToast('You can select maximum 3 files', 'warning');
+                    return;
+                }
+
+                const newSelected = file.is_selected ? 
+                    selectedFileIds.filter(id => id !== fileId) :
+                    [...selectedFileIds, fileId];
+
+                const response = await fetch('/api/files/select_files', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(newSelected)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Update local state
+                file.is_selected = !file.is_selected;
+                selectedFileIds = newSelected;
+                
+                renderFiles(allFiles);
+                updateStats();
+                
+                showToast(`File ${file.is_selected ? 'selected' : 'unselected'}`, 'success');
+                
+            } catch (error) {
+                console.error('Error toggling file selection:', error);
+                showToast('Failed to update file selection', 'error');
+            }
+        }
+
+        async function initializeResources() {
+            try {
+                const initializeBtn = document.getElementById('initializeBtn');
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                
+                // Update UI to show initialization starting
+                initializeBtn.disabled = true;
+                initializeBtn.innerHTML = '⏳ Starting...';
+                statusIndicator.className = 'status-indicator loading';
+                statusText.textContent = 'RAG Status: Starting initialization...';
+                
+                showToast('Starting RAG initialization in background...', 'info');
+                
+                const response = await fetch('/api/chain/initialize', {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Start polling for status updates
+                initializeBtn.innerHTML = '⏳ Initializing...';
+                statusText.textContent = 'RAG Status: Initializing...';
+                showToast('RAG initialization started. This may take a few minutes...', 'info');
+                
+                // Poll status every 2 seconds
+                const statusInterval = setInterval(async () => {
+                    try {
+                        const statusResponse = await fetch('/api/chain/status', {
+                            headers: getAuthHeaders()
+                        });
+                        
+                        if (statusResponse.ok) {
+                            const statusData = await statusResponse.json();
+                            
+                            if (statusData.status === 'ready') {
+                                // Success
+                                clearInterval(statusInterval);
+                                initializeBtn.innerHTML = '✅ Initialized';
+                                statusIndicator.className = 'status-indicator success';
+                                statusText.textContent = 'RAG Status: Ready';
+                                showToast('RAG resources initialized successfully!', 'success');
+                                
+                                setTimeout(() => {
+                                    initializeBtn.innerHTML = '🚀 Initialize RAG Resources';
+                                    initializeBtn.disabled = false;
+                                }, 3000);
+                                
+                            } else if (statusData.status === 'error') {
+                                // Error
+                                clearInterval(statusInterval);
+                                initializeBtn.innerHTML = '❌ Failed';
+                                initializeBtn.disabled = false;
+                                statusIndicator.className = 'status-indicator error';
+                                statusText.textContent = 'RAG Status: Error';
+                                showToast(`Initialization failed: ${statusData.message}`, 'error');
+                                
+                                setTimeout(() => {
+                                    initializeBtn.innerHTML = '🚀 Initialize RAG Resources';
+                                }, 3000);
+                            }
+                            // If status is still 'initializing', continue polling
+                        }
+                    } catch (error) {
+                        console.error('Error checking status:', error);
+                    }
+                }, 2000);
+                
+                // Stop polling after 10 minutes (timeout)
+                setTimeout(() => {
+                    clearInterval(statusInterval);
+                    if (statusIndicator.className.includes('loading')) {
+                        initializeBtn.innerHTML = '⏰ Timeout';
+                        statusText.textContent = 'RAG Status: Timeout';
+                        showToast('Initialization timeout. Please try again.', 'warning');
+                        setTimeout(() => {
+                            initializeBtn.innerHTML = '🚀 Initialize RAG Resources';
+                            initializeBtn.disabled = false;
+                        }, 3000);
+                    }
+                }, 600000); // 10 minutes
+                
+            } catch (error) {
+                console.error('Error initializing resources:', error);
+                
+                // Update UI to show error
+                const initializeBtn = document.getElementById('initializeBtn');
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                
+                initializeBtn.innerHTML = '❌ Failed';
+                initializeBtn.disabled = false;
+                statusIndicator.className = 'status-indicator error';
+                statusText.textContent = 'RAG Status: Error';
+                
+                showToast('Failed to start RAG initialization', 'error');
+                
+                setTimeout(() => {
+                    initializeBtn.innerHTML = '🚀 Initialize RAG Resources';
+                }, 3000);
+            }
+        }
+
+        /**
+         * Upload functionality
+         */
+        function openUploadModal() {
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            resetUploadForm();
+        }
+
+        function resetUploadForm() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePreviewContainer').style.display = 'none';
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = 'Uploading...';
+        }
+
+        function setupDragAndDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('fileInput').files = files;
+                    handleFileUpload({ target: { files } });
+                }
+            });
+        }
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            // Validate files
+            for (let file of files) {
+                if (file.type !== 'application/pdf') {
+                    showToast('Only PDF files are allowed', 'error');
+                    return;
+                }
+            }
+
+            // Show preview of selected files
+            showFilePreview(files);
+        }
+
+        function showFilePreview(files) {
+            const previewContainer = document.getElementById('filePreviewContainer');
+            const previewList = document.getElementById('filePreviewList');
+            
+            previewList.innerHTML = Array.from(files).map((file, index) => `
+                <div class="preview-file-item" data-index="${index}">
+                    <div class="preview-file-info">
+                        <div class="preview-file-icon">📄</div>
+                        <div class="preview-file-details">
+                            <div class="preview-file-name">${file.name}</div>
+                            <div class="preview-file-size">${formatFileSize(file.size)}</div>
+                        </div>
+                    </div>
+                    <button class="preview-remove-btn" onclick="removePreviewFile(${index})" title="Remove">
+                        ×
+                    </button>
+                </div>
+            `).join('');
+            
+            previewContainer.style.display = 'block';
+        }
+
+        function removePreviewFile(index) {
+            const fileInput = document.getElementById('fileInput');
+            const dt = new DataTransfer();
+            
+            // Re-add all files except the one to remove
+            Array.from(fileInput.files).forEach((file, i) => {
+                if (i !== index) {
+                    dt.items.add(file);
+                }
+            });
+            
+            fileInput.files = dt.files;
+            
+            if (fileInput.files.length === 0) {
+                clearFileSelection();
+            } else {
+                showFilePreview(fileInput.files);
+            }
+        }
+
+        function clearFileSelection() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePreviewContainer').style.display = 'none';
+        }
+
+        async function uploadSelectedFiles() {
+            const fileInput = document.getElementById('fileInput');
+            const files = fileInput.files;
+            
+            if (!files || files.length === 0) {
+                showToast('No files selected', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            for (let file of files) {
+                formData.append('files', file);
+            }
+
+            try {
+                // Show progress
+                document.getElementById('uploadProgress').style.display = 'block';
+                
+                const response = await fetch('/api/files/upload_files', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Complete progress
+                document.getElementById('progressFill').style.width = '100%';
+                document.getElementById('progressText').textContent = 'Upload complete!';
+                
+                showToast(`${files.length} file(s) uploaded successfully!`, 'success');
+                
+                // Close modal and refresh
+                setTimeout(() => {
+                    closeUploadModal();
+                    loadFiles();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error uploading files:', error);
+                showToast('Failed to upload files', 'error');
+                resetUploadForm();
+            }
+        }
+
+        /**
+         * File details modal
+         */
+        function showFileDetails(fileId) {
+            const file = allFiles.find(f => f.id === fileId);
+            if (!file) return;
+
+            currentFileId = fileId;
+            
+            document.getElementById('fileDetailsTitle').textContent = `📄 ${file.filename}`;
+            document.getElementById('fileDetailsContent').innerHTML = `
+                <div class="file-details">
+                    <div class="detail-row">
+                        <strong>🤖 AI Generated Description:</strong>
+                        <div class="detail-value description-content">
+                            ${file.description || 'No description available. The AI summary is being generated in the background.'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('fileDetailsModal').style.display = 'flex';
+        }
+
+        function closeFileDetailsModal() {
+            document.getElementById('fileDetailsModal').style.display = 'none';
+            currentFileId = null;
+        }
+
+        async function downloadFile(fileId) {
+            try {
+                const response = await fetch(`/api/files/download/${fileId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const blob = await response.blob();
+                const file = allFiles.find(f => f.id === fileId);
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showToast('File downloaded successfully', 'success');
+                
+            } catch (error) {
+                console.error('Error downloading file:', error);
+                showToast('Failed to download file', 'error');
+            }
+        }
+
+        function deleteFileFromList(fileId) {
+            const file = allFiles.find(f => f.id === fileId);
+            showConfirmModal(
+                'Delete File',
+                `Are you sure you want to delete "${file.filename}"? This action cannot be undone.`,
+                async () => {
+                    try {
+                        const response = await fetch(`/api/files/${fileId}`, {
+                            method: 'DELETE',
+                            headers: getAuthHeaders()
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        showToast('File deleted successfully', 'success');
+                        loadFiles(); // Reload the file list
+                        
+                    } catch (error) {
+                        console.error('Error deleting file:', error);
+                        showToast('Failed to delete file', 'error');
+                    }
+                }
+            );
+        }
+
+        /**
+         * Confirmation modal
+         */
+        function showConfirmModal(title, message, callback) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmCallback = null;
+        }
+
+        function confirmAction() {
+            if (confirmCallback) {
+                confirmCallback();
+                closeConfirmModal();
+            }
+        }
+
+        /**
+         * Search functionality
+         */
+        function handleSearch(event) {
+            const searchTerm = event.target.value.toLowerCase();
+            const filteredFiles = allFiles.filter(file => 
+                file.filename.toLowerCase().includes(searchTerm) ||
+                (file.summary && file.summary.toLowerCase().includes(searchTerm))
+            );
+            renderFiles(filteredFiles);
+        }
+
+        /**
+         * Utility functions
+         */
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 B';
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    if (modal.id === 'uploadModal') {
+                        resetUploadForm();
+                    }
+                    if (modal.id === 'fileDetailsModal') {
+                        currentFileId = null;
+                    }
+                    if (modal.id === 'confirmModal') {
+                        confirmCallback = null;
+                    }
+                }
+            });
+        });
+
+        // Function to check RAG initialization status
+        async function checkRAGStatus() {
+            try {
+                const response = await fetch('/api/chain/status', {
+                    headers: getAuthHeaders()
+                });
+
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.initialized) {
+                        statusIndicator.className = 'status-indicator success';
+                        statusText.textContent = 'RAG Status: Ready';
+                    } else {
+                        statusIndicator.className = 'status-indicator warning';
+                        statusText.textContent = 'RAG Status: Not Initialized';
+                    }
+                } else {
+                    statusIndicator.className = 'status-indicator error';
+                    statusText.textContent = 'RAG Status: Unknown';
+                }
+            } catch (error) {
+                console.error('Error checking RAG status:', error);
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                statusIndicator.className = 'status-indicator error';
+                statusText.textContent = 'RAG Status: Error';
+            }
+        }
+
+        // Initial check for RAG status
+        checkRAGStatus();
+    </script>
+</body>
+</html>

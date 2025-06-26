@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Advanced RAG System</title>
+    
+    <!-- Favicon for branding -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+    
+    <!-- Meta tags for SEO and social sharing -->
+    <meta name="description" content="Login to Advanced RAG System - AI-powered document analysis and question answering">
+    <meta name="keywords" content="RAG, AI, authentication, document analysis, machine learning">
+    <meta property="og:title" content="Advanced RAG System - Login">
+    <meta property="og:description" content="Secure access to AI-powered document analysis platform">
+    <meta property="og:type" content="website">
+    
+    <!-- Preconnect to external resources for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Main container with centering -->
+    <div class="container">
+        <!-- Authentication card with glass morphism effect -->
+        <div class="auth-card">
+            <!-- Header section with branding -->
+            <div class="auth-header">
+                <h1>🤖 Welcome Back</h1>
+                <p>Sign in to your Advanced RAG account</p>
+            </div>
+            
+            <!-- Login form -->
+            <form class="auth-form" id="loginForm" method="POST">
+                <!-- Username input field -->
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="Enter your username"
+                        required
+                        autocomplete="username"
+                        spellcheck="false"
+                    >
+                </div>
+                
+                <!-- Password input field -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+                
+                <!-- Login button -->
+                <button type="submit" class="btn-primary">
+                    Sign In
+                </button>
+            </form>
+            
+            <!-- Navigation links to other auth pages -->
+            <div class="auth-links">
+                <a href="/register" class="auth-link">
+                    🆕 New user? Create an account
+                </a>
+                <a href="/forgot-password" class="auth-link">
+                    🔐 Forgot your password? Reset it
+                </a>
+            </div>
+            
+            <!-- Footer with branding -->
+            <div class="auth-footer">
+                <p>Advanced RAG System</p>
+                <div class="tech-badge">
+                    AI-Powered Document Analysis
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Interactive JavaScript -->
+    <script>
+        // Simple toast function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function showMessage(message, type = 'info') {
+            showToast(message, type);
+        }
+    </script>
+    <script src="/js/auth.js"></script>
+    
+    <!-- Additional login-specific JavaScript -->
+    <script>
+        // Login page specific functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus on username field when page loads
+            const usernameField = document.getElementById('username');
+            if (usernameField) {
+                usernameField.focus();
+            }
+            
+            // Add remember me functionality (if needed)
+            const form = document.getElementById('loginForm');
+            form.addEventListener('submit', function(e) {
+                // You can add additional login-specific logic here
+                console.log('🔐 Login attempt initiated');
+            });
+            
+            // Check for any URL parameters (like redirect after logout)
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = urlParams.get('message');
+            if (message) {
+                // Show message if redirected with a message parameter
+                if (message === 'logout') {
+                    showMessage('You have been logged out successfully', 'success');
+                } else if (message === 'session_expired') {
+                    showMessage('Your session has expired. Please sign in again.', 'info');
+                }
+            }
+        });
+        
+        // Add keyboard shortcuts for better UX
+        document.addEventListener('keydown', function(e) {
+            // Allow Enter key to submit form from any field
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                const form = document.getElementById('loginForm');
+                if (form) {
+                    form.requestSubmit();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

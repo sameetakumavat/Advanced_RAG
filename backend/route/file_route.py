@@ -1,6 +1,7 @@
 import os
 import datetime
 from fastapi import APIRouter, BackgroundTasks, UploadFile, HTTPException, Depends
+from fastapi.responses import FileResponse
 from typing import Annotated, List
 from sqlalchemy.orm import Session
 
@@ -130,3 +131,25 @@ def delete_file(file_id: int, user: user_dependency, db: db_dependency):
     db.commit()
     
     return {"message": f"File '{file.filename}' deleted successfully."}
+
+
+@file_router.get("/download/{file_id}")
+def download_file(file_id: int, user: user_dependency, db: db_dependency):
+    """Download a file."""
+    file = db.query(UploadedFiles).filter(UploadedFiles.id == file_id).first()
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found.")
+    
+    # Validate if user owns this file
+    if file.user_id != user.get("user_id"):
+        raise HTTPException(status_code=403, detail="You don't have permission to download this file.")
+    
+    # Check if file exists on filesystem
+    if not os.path.exists(file.file_path):
+        raise HTTPException(status_code=404, detail="File not found on filesystem.")
+    
+    return FileResponse(
+        path=file.file_path,
+        filename=file.filename,
+        media_type='application/pdf'
+    )

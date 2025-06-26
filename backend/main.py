@@ -7,6 +7,7 @@ from route.auth_route import auth_router
 from route.rag_route import chain_router
 from route.file_route import file_router
 from route.chat_route import chat_router
+from route.dashboard_route import dashboard_router
 
 app = FastAPI()
 
@@ -27,6 +28,7 @@ app.include_router(auth_router)
 app.include_router(file_router)
 app.include_router(chain_router)
 app.include_router(chat_router)
+app.include_router(dashboard_router)
 
 if __name__ == "__main__":
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

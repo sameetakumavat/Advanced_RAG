@@ -1,6 +1,6 @@
 import re
 from typing import Annotated
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 import json
 from chains.rag_chain import rag_chain, wikipedia_rag_chain
@@ -18,10 +18,36 @@ db_config = DataBaseConfig()
 user_dependency = Annotated[dict, Depends(auth_service.get_current_user)]
 db_dependency = Annotated[Session, Depends(db_config.get_db)]
 
+# Global status tracking
+initialization_status = {
+    "status": "not_initialized",  # not_initialized, initializing, ready, error
+    "message": "",
+    "user_id": None
+}
+
+def background_initialize_resources(user_id: int, file_paths: list):
+    """Background task to initialize RAG resources."""
+    global initialization_status
+    try:
+        initialization_status["status"] = "initializing"
+        initialization_status["message"] = "Initializing RAG resources..."
+        initialization_status["user_id"] = user_id
+        
+        # Initialize resources with file paths
+        response = resource_service.initialize_resources(selected_file_paths=file_paths)
+        
+        initialization_status["status"] = "ready"
+        initialization_status["message"] = "RAG resources initialized successfully"
+        
+    except Exception as e:
+        initialization_status["status"] = "error"
+        initialization_status["message"] = f"Failed to initialize: {str(e)}"
+
 
 @chain_router.post("/initialize")
-def initialize_resource(user: user_dependency, db: db_dependency):
-    """Initialize resources using selected files from database."""
+def initialize_resource(user: user_dependency, db: db_dependency, background_tasks: BackgroundTasks):
+    """Initialize resources using selected files from database in background."""
+    global initialization_status
     try:
         # Get selected files from database
         selected_files = get_selected_files(user, db)
@@ -29,12 +55,53 @@ def initialize_resource(user: user_dependency, db: db_dependency):
         if not files:
             return {"status": "warning", "message": "No files selected. Please select files first."}
 
-        # Initialize resources with file paths for these files
+        # Check if already initializing
+        if initialization_status["status"] == "initializing":
+            return {
+                "status": "info", 
+                "message": "Initialization already in progress. Please wait...",
+                "initialization_status": initialization_status["status"]
+            }
+
+        # Start background initialization
         file_paths = [file["file_path"] for file in files]
-        response = resource_service.initialize_resources(selected_file_paths=file_paths)
-        return response
+        background_tasks.add_task(background_initialize_resources, user.get("user_id"), file_paths)
+        
+        return {
+            "status": "success", 
+            "message": "RAG initialization started in background. Check status for updates.",
+            "initialization_status": "initializing"
+        }
     except Exception as e:
+        initialization_status["status"] = "error"
+        initialization_status["message"] = str(e)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@chain_router.get("/status")
+def get_initialization_status(user: user_dependency):
+    """Check if RAG resources are initialized."""
+    global initialization_status
+    try:
+        # Check if resources are actually initialized
+        is_initialized = resource_service.is_initialized()
+        
+        # If resources are initialized but status says otherwise, update status
+        if is_initialized and initialization_status["status"] != "ready":
+            initialization_status["status"] = "ready"
+            initialization_status["message"] = "RAG resources are ready"
+        
+        return {
+            "initialized": is_initialized,
+            "status": initialization_status["status"],
+            "message": initialization_status["message"]
+        }
+    except Exception as e:
+        return {
+            "initialized": False,
+            "status": "error",
+            "message": str(e)
+        }
 
 
 @chain_router.post("/ask_documents")

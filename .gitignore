@@ -2,6 +2,10 @@
 .env
 *.env
 
+# Node modules
+node_modules/
+*/node_modules/
+
 # Database files
 *.db
 *.sqlite*
@@ -11,6 +15,7 @@ db.sqlite3
 # Test files and directories
 *test_files/
 *data/
+*test*
 
 # Virtual environments
 venv/

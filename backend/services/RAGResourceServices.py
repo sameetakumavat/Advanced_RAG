@@ -104,3 +104,7 @@ class ResourceService:
             for i, doc in enumerate(retrieved_docs)
         ]
         return "\n\n" + "\n\n".join(formatted)
+
+    def is_initialized(self) -> bool:
+        """Check if the vectorstore is initialized."""
+        return self.vectorstore_db is not None
