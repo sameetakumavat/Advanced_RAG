@@ -5,11 +5,10 @@ from fastapi.responses import FileResponse
 from typing import Annotated, List
 from sqlalchemy.orm import Session
 
-from services.AuthService import AuthService
-from services.DataBaseConfig import DataBaseConfig
+from services import AuthService, DataBaseConfig
 from initalize_resources import resource_service
 from db_models import UploadedFiles
-from chains.file_summary import summarize_document
+from chains_and_agents.file_summary import summarize_document
 
 file_router = APIRouter(prefix="/files", tags=["files"])
 auth_service = AuthService()
@@ -17,6 +16,8 @@ db_config = DataBaseConfig()
 user_dependency = Annotated[dict, Depends(auth_service.get_current_user)]
 db_dependency = Annotated[Session, Depends(db_config.get_db)]
 
+
+# Helper functions
 def generate_and_save_summary(file_path: str, file_id: int, db: Session):
     """Generate summary in background and update database."""
     try:
@@ -30,11 +31,32 @@ def generate_and_save_summary(file_path: str, file_id: int, db: Session):
     except Exception as e:
         print(f"Error in background summary generation: {str(e)}")
 
+def get_document_descriptions(db: Session) -> str:
+    """Get descriptions of currently selected documents."""
+    try:
+        from db_models import UploadedFiles
+        selected_files = db.query(UploadedFiles).filter(UploadedFiles.is_selected == True).all()
+        if selected_files:
+            descriptions = []
+            for file in selected_files:
+                descriptions.append(f"- {file.filename}: {file.description or 'No description available'}")
+            return "\n".join(descriptions)
+        return "No documents currently selected."
+    except Exception as e:
+        print(f"Error getting document descriptions: {str(e)}")
+        return "Error retrieving document information."
+
 
 @file_router.post("/upload_files")
 async def upload_file(user: user_dependency, db: db_dependency, files: List[UploadFile], background_tasks: BackgroundTasks):
     """Upload a file and store record in database."""
     uploaded_files = []
+    # check if uploaded files are already present
+    for file in files:
+        existing_file = db.query(UploadedFiles).filter(UploadedFiles.filename == file.filename, UploadedFiles.user_id == user.get("user_id")).first()
+        if existing_file:
+            raise HTTPException(status_code=400, detail=f"File '{file.filename}' already exists for this user.")
+
     # Save file to filesystem
     for file in files:
         file_path = os.path.join(resource_service.uploaded_rag_folder_path, file.filename)
@@ -131,25 +153,3 @@ def delete_file(file_id: int, user: user_dependency, db: db_dependency):
     db.commit()
     
     return {"message": f"File '{file.filename}' deleted successfully."}
-
-
-@file_router.get("/download/{file_id}")
-def download_file(file_id: int, user: user_dependency, db: db_dependency):
-    """Download a file."""
-    file = db.query(UploadedFiles).filter(UploadedFiles.id == file_id).first()
-    if not file:
-        raise HTTPException(status_code=404, detail="File not found.")
-    
-    # Validate if user owns this file
-    if file.user_id != user.get("user_id"):
-        raise HTTPException(status_code=403, detail="You don't have permission to download this file.")
-    
-    # Check if file exists on filesystem
-    if not os.path.exists(file.file_path):
-        raise HTTPException(status_code=404, detail="File not found on filesystem.")
-    
-    return FileResponse(
-        path=file.file_path,
-        filename=file.filename,
-        media_type='application/pdf'
-    )

@@ -2,18 +2,17 @@
 
 This is the backend API for the Advanced RAG (Retrieval-Augmented Generation) system, built with FastAPI, LangChain and LangGraph. It manages authentication, document storage, and AI-powered question answering with citations.
 
-> **Note (June 2025):** The Chat interface and advanced query routing features are still in active development. Core functionality (authentication, file management, dashboard, and basic RAG) is stable and fully implemented.
-
 ## Features
 
 - **RESTful API**: FastAPI-powered endpoints for all operations
-- **Authentication**: JWT-based secure authentication system
+- **Authentication**: JWT-based secure authentication system with token management
 - **Database**: SQLite with SQLAlchemy ORM and Alembic migrations
-- **File Management**: Upload, list, and selection of PDF documents
-- **RAG Implementation**: Using LangChain, FAISS and Groq AI models
-- **Wikipedia Integration**: Alternative knowledge source for questions
-- **Graph-Based Agents**: LangGraph implementation for both single question and chat workflows
-- **Conversational RAG**: Stateful chat sessions with context awareness and history summarization
+- **File Management**: Upload, list, select, and automatic summarization of PDF documents
+- **RAG Implementation**: Using LangChain, LangGraph agentic flows, FAISS vectorstore, HuggingFace embeddings, and Groq AI models for accurate retrieval
+- **Wikipedia Integration**: Alternative knowledge source for questions outside document scope
+- **Graph-Based Agents**: LangGraph implementation for intelligent query routing and processing
+- **Conversational RAG**: Stateful chat sessions with context awareness and citation tracking
+- **Session Management**: Multiple active chat sessions with history tracking
 
 ## Setup Instructions
 
@@ -21,6 +20,7 @@ This is the backend API for the Advanced RAG (Retrieval-Augmented Generation) sy
 
 - Python 3.12+
 - Virtual Environment
+- Groq API key (for the LLM)
 
 ### Installation
 
@@ -28,6 +28,7 @@ This is the backend API for the Advanced RAG (Retrieval-Augmented Generation) sy
    ```bash
    git clone <repository-url>
    cd Advanced_RAG/backend
+   ```
 
 2. Create and activate a virtual environment:
    ```bash
@@ -48,7 +49,13 @@ This is the backend API for the Advanced RAG (Retrieval-Augmented Generation) sy
    
 5. Edit the `.env` file with your credentials and settings:
    - Set `GROQ_API_KEY` with your Groq API key
-   - Configure JWT_SECRET_KEY for authentication
+   - Configure `JWT_SECRET_KEY` for authentication (used for token generation)
+   - Default model is `llama-3.3-70b-versatile` but can be changed in the `.env` file
+
+6. Create the upload directory if it doesn't exist:
+   ```bash
+   mkdir -p uploaded_files
+   ```
 
 7. Initialize the database with Alembic:
    ```bash
@@ -63,12 +70,73 @@ This is the backend API for the Advanced RAG (Retrieval-Augmented Generation) sy
 
 ### Running the Application
 
-Start the FastAPI server:
+1. Start the FastAPI server:
    ```bash
    python main.py
    ```
 
-Access the API documentation at http://localhost:8000/docs
+2. The server will run on port 8000 by default. Access the API at:
+   - API Documentation: http://localhost:8000/docs
+   - Alternative Docs UI: http://localhost:8000/redoc
+   - Health Check: http://localhost:8000/
+
+3. Usage workflow:
+   - First authenticate using `/auth/token` endpoint
+   - Upload PDF documents using `/files/upload_files`
+   - Select files for processing with `/files/select_files`
+   - Initialize the RAG system with `/chain/initialize`
+   - Use either single-question endpoints or start a chat session
+
+4. For chat functionality:
+   - Start a session with `/chat/start`
+   - Send messages using `/chat/message` endpoint
+   - View history with `/chat/history/{session_id}`
+   - End session with `/chat/end/{session_id}`
+
+## System Architecture
+
+### Overview
+The system uses a modular architecture built around FastAPI, with several key components:
+
+- **Routes**: API endpoints organized by functionality (auth, files, RAG, chat)
+- **Services**: Core business logic and infrastructure components
+- **Chains & Agents**: LangChain and LangGraph implementations for RAG functionality
+- **Database Models**: SQLAlchemy models for persistent storage
+- **Schemas**: Pydantic models for request/response validation
+
+### Key Components
+
+1. **Authentication System**:
+   - JWT token-based authentication
+   - Bcrypt password hashing
+   - User management and session tracking
+
+2. **File Management**:
+   - PDF file upload and storage
+   - Automatic document summarization using LLMs
+   - File selection for RAG processing
+
+3. **RAG Implementation**:
+   - Document chunking and vector embedding
+   - FAISS vector store for similarity search
+   - LangGraph agent for query routing
+   - Citation tracking and formatting
+
+4. **Chat System**:
+   - Session-based conversations
+   - Context-aware responses
+   - History tracking and reference
+   - LangGraph workflow for intelligent responses
+
+### Data Flow
+
+1. User authenticates and receives a token
+2. User uploads and selects documents
+3. System initializes the RAG pipeline (embedding documents)
+4. User can then:
+   - Ask single questions with the RAG agent
+   - Start a chat session for conversational interactions
+5. All responses include relevant citations to document sources
 
 ## API Endpoints
 
@@ -95,13 +163,11 @@ Access the API documentation at http://localhost:8000/docs
 - `POST /chain/ask_question`: Ask a question with automatic routing to documents or Wikipedia
 - `POST /chain/ask_rag_agent`: Ask a question using the LangGraph agent
 
-### Dashboard Operations
-- `GET /dashboard/stats`: Get user dashboard statistics (file count, username, etc.)
-
 ### Chat Operations
 - `POST /chat/start`: Start a new chat session
-- `POST /chat/message`: Send a message in an existing chat session
-- `GET /chat/history/{session_id}`: Get chat history for a session
+- `GET /chat/get_list_of_active_sessions`: Get all active chat sessions for a user
+- `POST /chat/message`: Send a message to an existing chat session
+- `GET /chat/history/{session_id}`: Get complete history of a chat session
 - `DELETE /chat/end/{session_id}`: End a chat session
 
 ## Project Structure
@@ -109,9 +175,8 @@ Access the API documentation at http://localhost:8000/docs
 backend/
 ├── alembic.ini                # Alembic configuration
 ├── db_migrations/             # Database migration scripts
-├── chains/                    # RAG implementations
+├── chains_and_agents/         # RAG implementations
 │   ├── chat_rag_agent.py      # Conversational RAG with LangGraph
-│   ├── decision_chain.py      # Query routing logic
 │   ├── file_summary.py        # Document summarization
 │   ├── rag_agent.py           # Single-question LangGraph agent
 │   └── rag_chain.py           # Basic RAG chain implementation
@@ -119,29 +184,58 @@ backend/
 │   ├── auth_route.py          # Authentication routes
 │   ├── chat_route.py          # Chat session routes
 │   ├── file_route.py          # File management routes
-│   ├── dashboard_route.py     # Dashboard stats routes
 │   └── rag_route.py           # RAG/QA routes
 ├── schemas/                   # Pydantic models
 │   ├── auth.py                # Authentication schemas
+│   ├── chat_models.py         # Chat input/output schemas
 │   └── rag_models.py          # RAG input/output schemas
 ├── services/                  # Business logic
-│   ├── AuthService.py         # Authentication service
+│   ├── AuthService.py         # Authentication services
 │   ├── DataBaseConfig.py      # Database configuration
-│   └── RAGResourceServices.py # RAG services
-├── db_models.py               # SQLAlchemy ORM models
-├── initalize_resources.py     # Resource initialization
+│   ├── RAGResourceServices.py # RAG resource management
+│   └── SessionManager.py      # Chat session management
+├── db_models.py               # SQLAlchemy models
 ├── main.py                    # Application entry point
-├── prompt.py                  # AI prompt templates
-└── requirements.txt           # Dependencies
+└── prompt.py                  # LLM prompt templates
 ```
 
-## Production Recommendations
+## Environment Variables
 
-For production deployment, consider the following enhancements:
+The system requires the following environment variables to be set in the `.env` file:
 
-1. **Chat Session Persistence**: Implement database storage for chat sessions to persist across server restarts
-2. **Document-Session Linkage**: Associate chat sessions with specific document selections
-3. **Session Management**: Add TTL (time-to-live) policies for archived chat sessions
-4. **Multi-User Scalability**: Optimize for concurrent users with proper session isolation
-5. **Authentication Enhancements**: Add refresh tokens and session expiration
-6. **Monitoring**: Add logging and performance monitoring
+| Variable | Description | Example |
+|----------|-------------|---------|
+| MODEL_NAME | The Groq model to use for LLM operations | llama-3.3-70b-versatile |
+| GROQ_API_KEY | API key for Groq | your-api-key-here |
+| JWT_SECRET_KEY | Secret key for JWT token generation | your-secret-key-here |
+| ALGORITHM | Algorithm for JWT token | HS256 |
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Database initialization error**
+   - Ensure you've run `alembic upgrade head` to create all database tables
+   - Check that the SQLite database file has correct permissions
+
+2. **File upload errors**
+   - Make sure the `uploaded_files` directory exists and has write permissions
+   - Check if the file size is within limits (defaults to 20MB)
+
+3. **RAG initialization failures**
+   - Check your Groq API key is valid and has sufficient quota
+   - Ensure selected files exist and are valid PDFs
+   - Look for error messages in the server logs
+
+4. **Authentication issues**
+   - Verify your JWT_SECRET_KEY is set correctly
+   - Check token expiration (default is 30 minutes)
+   - Ensure user exists in the database
+
+### Logging
+
+The application uses Python's standard logging module. To enable more verbose logging for debugging, modify the logging configuration in the main application file.
+
+## License
+
+This project is licensed under the terms of the LICENSE file included in the repository.

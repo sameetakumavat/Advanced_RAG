@@ -18,7 +18,7 @@
     
     <!-- Main stylesheet -->
     <link rel="stylesheet" href="/css/style.css">
-    <!-- Dashboard specific styles -->
+    <!-- Dashboard styles -->
     <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
@@ -41,8 +41,8 @@
     <div class="dashboard-container">
         <!-- Dashboard Header -->
         <div class="dashboard-header">
-            <h1>🎯 Control Center</h1>
-            <p>Choose your AI-powered document analysis workflow</p>
+            <h1><span class="icon">🎯</span> <span class="text">Document AI</span></h1>
+            <p>Select an option below to get started with your documents</p>
         </div>
 
         <!-- Main Feature Cards Grid -->
@@ -52,13 +52,13 @@
             <div class="feature-card" id="fileManagementCard">
                 <div class="card-icon">📁</div>
                 <h2>Document Management</h2>
-                <p>Upload, organize, and manage your PDF documents for AI analysis</p>
+                <p>Upload, manage and select PDF documents for AI-powered analysis</p>
                 <div class="card-actions">
                     <button class="btn-primary" onclick="navigateToFileManagement()">
                         Manage Documents
                     </button>
                     <div class="card-stats">
-                        <span id="fileCount">0</span> files uploaded
+                        <span id="fileCount">0</span> documents available
                     </div>
                 </div>
             </div>
@@ -66,29 +66,29 @@
             <!-- Query Interface Card -->
             <div class="feature-card" id="queryInterfaceCard">
                 <div class="card-icon">🔍</div>
-                <h2>Query Interface</h2>
-                <p>Ask questions about your documents or search Wikipedia knowledge</p>
+                <h2>Quick Question Mode</h2>
+                <p>Ask single questions about your selected documents</p>
                 <div class="card-actions">
                     <button class="btn-primary" onclick="navigateToQueryInterface()">
-                        Start Querying
+                        Ask Questions
                     </button>
                     <div class="card-stats">
-                        Single-shot Q&A mode
+                        Get direct answers from your documents
                     </div>
                 </div>
             </div>
 
             <!-- Chat Interface Card -->
             <div class="feature-card" id="chatInterfaceCard">
-                <div class="card-icon">💬</div>
-                <h2>Chat Interface</h2>
-                <p>Have conversational interactions with your documents using AI</p>
+                <div class="card-icon">💭</div>
+                <h2>Chat with Documents</h2>
+                <p>Have ongoing conversations about your documents with AI</p>
                 <div class="card-actions">
                     <button class="btn-primary" onclick="navigateToChatInterface()">
                         Start Chatting
                     </button>
                     <div class="card-stats">
-                        Conversational AI mode
+                        Interactive conversation with memory
                     </div>
                 </div>
             </div>
@@ -102,103 +102,7 @@
         <p>Loading...</p>
     </div>
 
-    <!-- JavaScript -->
-    <script>
-        // Simple utility functions
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#17a2b8'};
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                z-index: 10000;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            `;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 5000);
-        }
-
-        function showLoading() {
-            let overlay = document.getElementById('loadingOverlay');
-            if (overlay) overlay.style.display = 'flex';
-        }
-
-        function hideLoading() {
-            let overlay = document.getElementById('loadingOverlay');
-            if (overlay) overlay.style.display = 'none';
-        }
-
-        function navigateWithLoading(url) {
-            showLoading();
-            setTimeout(() => {
-                window.location.href = url;
-            }, 300);
-        }
-
-        // Navigation functions
-        function navigateToFileManagement() {
-            navigateWithLoading('/file-management');
-        }
-
-        function navigateToQueryInterface() {
-            navigateWithLoading('/query-interface');
-        }
-
-        function navigateToChatInterface() {
-            navigateWithLoading('/chat-interface');
-        }
-
-        function handleLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('tokenType');
-                localStorage.removeItem('username');
-                showToast('Logged out successfully!', 'success');
-                setTimeout(() => {
-                    window.location.href = '/login?message=logout';
-                }, 1000);
-            }
-        }
-
-        // Dashboard functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load user data
-            const username = localStorage.getItem('username') || 'User';
-            const usernameElement = document.getElementById('username');
-            if (usernameElement) {
-                usernameElement.textContent = username;
-            }
-
-            // Simple API call to get stats
-            const token = localStorage.getItem('authToken');
-            const tokenType = localStorage.getItem('tokenType') || 'Bearer';
-            
-            if (token) {
-                fetch('/api/dashboard/stats', {
-                    headers: {
-                        'Authorization': `${tokenType} ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const fileCountElement = document.getElementById('fileCount');
-                        if (fileCountElement) {
-                            fileCountElement.textContent = data.data.fileCount || 0;
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.log('Stats loading failed, using defaults');
-                });
-            }
-        });
-    </script>
+    <!-- Dashboard JavaScript -->
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>

@@ -364,9 +364,9 @@ async function handleRegisterSubmit(event) {
         const result = await response.json();
         
         if (response.ok) {
-            showToast('Account created successfully! Redirecting to dashboard...', 'success');
+            showToast('Account created successfully! Redirecting to login...', 'success');
             setTimeout(() => {
-                window.location.href = '/dashboard';
+                window.location.href = '/login';
             }, 1500);
         } else {
             showToast(result.detail || 'Registration failed. Please try again.', 'error');

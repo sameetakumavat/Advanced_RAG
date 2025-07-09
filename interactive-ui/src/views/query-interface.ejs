@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Query Interface - Advanced RAG System</title>
+    <title>QA Interface - Advanced RAG System</title>
     
     <!-- Favicon for branding -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
     
     <!-- Meta tags -->
-    <meta name="description" content="Query Interface - Ask questions to your documents and Wikipedia using AI">
+    <meta name="description" content="QA Interface - Ask questions to your documents and Wikipedia using AI">
     
     <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,16 +19,16 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/dashboard.css">
     <link rel="stylesheet" href="/css/query-interface.css">
+    
+    <!-- JavaScript -->
+    <script src="/js/query-interface.js" defer></script>
 </head>
 <body>
     <!-- Top Navigation Bar -->
     <nav class="top-nav">
         <div class="nav-container">
             <div class="nav-brand">
-                <button class="back-btn" onclick="goBackToDashboard()">
-                    ← Back
-                </button>
-                <h1>🔍 Query Interface</h1>
+                <h1>🤖 Advanced RAG</h1>
             </div>
             <div class="nav-user">
                 <span class="welcome-text">Welcome, <span id="username">User</span>!</span>
@@ -39,600 +39,183 @@
         </div>
     </nav>
 
-    <!-- Main Query Container -->
+    <!-- Main QA Container -->
     <div class="query-container">
         
-        <!-- Query Options Section -->
-        <div class="query-options">
-            <h2>🎯 Choose Your Query Source</h2>
-            <p>Select where you want to search for information. You can query your uploaded documents, Wikipedia, or both for comprehensive results.</p>
+        <!-- QA Mode Selection -->
+        <div class="qa-modes">
+            <div class="qa-modes-header">
+                <div class="qa-modes-title">
+                    <h2>🎯 Choose Your QA Mode</h2>
+                    <p>Select the type of questions you want to ask and get AI-powered answers with citations.</p>
+                </div>
+                <div class="qa-modes-actions">
+                    <button class="btn-back-simple" onclick="goBackToDashboard()">
+                        ← Back to Dashboard
+                    </button>
+                </div>
+            </div>
             
-            <!-- Query Type Selection -->
-            <div class="query-type-selection">
-                <!-- Document Query -->
-                <div class="query-type-card" id="documentQueryCard" onclick="selectQueryType('documents')">
-                    <div class="query-type-header">
-                        <div class="query-type-icon">📄</div>
-                        <h3 class="query-type-title">Your Documents</h3>
+            <!-- QA Mode Cards -->
+            <div class="qa-mode-selection">
+                <!-- Document QA -->
+                <div class="qa-mode-card" id="documentQACard" data-mode="documents">
+                    <div class="qa-mode-header">
+                        <div class="qa-mode-icon">📄</div>
+                        <h3 class="qa-mode-title">Ask Your Documents</h3>
                     </div>
-                    <p class="query-type-description">
-                        Search through your uploaded PDF documents using the RAG system. Get answers based on your specific content.
+                    <p class="qa-mode-description">
+                        Get answers from your uploaded PDF documents with precise citations and references.
                     </p>
-                    <div class="query-type-status">
-                        <div class="status-indicator error" id="docStatusIndicator"></div>
-                        <span id="docStatusText">RAG system not initialized</span>
+                    <div class="qa-mode-status">
+                        <div class="status-indicator" id="docStatusIndicator"></div>
+                        <span id="docStatusText">Checking RAG status...</span>
                     </div>
+                    <button class="qa-mode-btn" id="docQABtn" onclick="selectQAMode('documents')" disabled>
+                        Select Mode
+                    </button>
                 </div>
 
-                <!-- Wikipedia Query -->
-                <div class="query-type-card" id="wikipediaQueryCard" onclick="selectQueryType('wikipedia')">
-                    <div class="query-type-header">
-                        <div class="query-type-icon">🌐</div>
-                        <h3 class="query-type-title">Wikipedia</h3>
+                <!-- Wikipedia QA -->
+                <div class="qa-mode-card" id="wikipediaQACard" data-mode="wikipedia">
+                    <div class="qa-mode-header">
+                        <div class="qa-mode-icon">🌐</div>
+                        <h3 class="qa-mode-title">Ask Wikipedia</h3>
                     </div>
-                    <p class="query-type-description">
-                        Search Wikipedia for general knowledge and information. No setup required - always ready to use.
+                    <p class="qa-mode-description">
+                        Search Wikipedia for general knowledge and get comprehensive answers with citations.
                     </p>
-                    <div class="query-type-status">
-                        <div class="status-indicator"></div>
+                    <div class="qa-mode-status">
+                        <div class="status-indicator success"></div>
                         <span>Always available</span>
                     </div>
+                    <button class="qa-mode-btn" onclick="selectQAMode('wikipedia')">
+                        Select Mode
+                    </button>
                 </div>
 
-                <!-- Hybrid Query -->
-                <div class="query-type-card" id="hybridQueryCard" onclick="selectQueryType('hybrid')">
-                    <div class="query-type-header">
-                        <div class="query-type-icon">🔄</div>
-                        <h3 class="query-type-title">Hybrid Search</h3>
+                <!-- Hybrid QA -->
+                <div class="qa-mode-card" id="hybridQACard" data-mode="hybrid">
+                    <div class="qa-mode-header">
+                        <div class="qa-mode-icon">🔄</div>
+                        <h3 class="qa-mode-title">Hybrid Search</h3>
                     </div>
-                    <p class="query-type-description">
-                        Combine results from both your documents and Wikipedia for comprehensive answers.
+                    <p class="qa-mode-description">
+                        Get intelligent answers from documents, Wikipedia, or general knowledge based on your question.
                     </p>
-                    <div class="query-type-status">
-                        <div class="status-indicator warning" id="hybridStatusIndicator"></div>
-                        <span id="hybridStatusText">Requires RAG initialization</span>
+                    <div class="qa-mode-status">
+                        <div class="status-indicator" id="hybridStatusIndicator"></div>
+                        <span id="hybridStatusText">Checking RAG status...</span>
                     </div>
+                    <button class="qa-mode-btn" id="hybridQABtn" onclick="selectQAMode('hybrid')" disabled>
+                        Select Mode
+                    </button>
                 </div>
             </div>
 
-            <!-- RAG Warning Message -->
+            <!-- RAG Not Initialized Warning -->
             <div class="warning-message" id="ragWarning" style="display: none;">
-                ⚠️ To query your documents, please first upload files and initialize the RAG system in 
-                <a href="/file-management" style="color: var(--warning-color); text-decoration: underline;">File Management</a>.
+                <div class="warning-content">
+                    <span class="warning-icon">⚠️</span>
+                    <div class="warning-text">
+                        <h4>RAG System Not Initialized</h4>
+                        <p>To query your documents or use hybrid search, please first upload files and initialize the RAG system.</p>
+                    </div>
+                    <button class="btn-warning" onclick="goToFileManagement()">
+                        Go to File Management
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Query Input Section -->
-        <div class="query-input-section">
-            <h3>💭 Ask Your Question</h3>
-            <form class="query-form" onsubmit="handleQuerySubmit(event)">
-                <!-- Query Input -->
-                <div class="form-group">
-                    <label for="queryInput">
-                        🗣️ Your Question
-                    </label>
-                    <textarea 
-                        id="queryInput" 
-                        class="query-textarea"
-                        placeholder="Ask any question... For example: 'What are the main points about climate change?' or 'Explain machine learning algorithms'"
-                        required
-                    ></textarea>
-                </div>
+        <!-- Selected Mode Display -->
+        <div class="selected-mode" id="selectedMode" style="display: none;">
+            <div class="mode-indicator">
+                <span id="selectedModeIcon">📄</span>
+                <span id="selectedModeText">Documents Mode Selected</span>
+            </div>
+            <button class="btn-change-mode" onclick="resetQAMode()">
+                Change Mode
+            </button>
+        </div>
 
-                <!-- Form Controls Row -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="wordLengthInput">
-                            📏 Response Length (words)
-                        </label>
+        <!-- Question Form -->
+        <div class="question-form" id="questionForm" style="display: none;">
+            <div class="form-group">
+                <label for="questionInput">Your Question</label>
+                <textarea 
+                    id="questionInput" 
+                    placeholder="Type your question here..."
+                    rows="3"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="wordLengthInput">Response Length (words)</label>
+                    <div class="number-input-wrapper">
                         <input 
                             type="number" 
                             id="wordLengthInput" 
-                            class="word-length-input"
                             value="250"
-                            min="50"
-                            max="1000"
-                            step="50"
                         >
+                        <div class="number-controls">
+                            <button type="button" onclick="adjustWordLength(50)">▲</button>
+                            <button type="button" onclick="adjustWordLength(-50)">▼</button>
+                        </div>
                     </div>
-                    
-                    <button type="submit" class="query-button" id="querySubmitBtn">
-                        <span id="queryButtonText">🚀 Ask Question</span>
-                        <div class="loading-spinner" id="querySpinner" style="display: none;"></div>
+                </div>
+
+                <button class="btn-primary" id="askButton" onclick="askQuestion()">
+                    <span id="askButtonText">🤔 Ask Question</span>
+                    <span id="askButtonLoading" style="display: none;">🔄 Processing...</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Answer Section -->
+        <div class="answer-section" id="answerSection" style="display: none;">
+            <div class="answer-header">
+                <h3>📝 Answer</h3>
+                <div class="answer-meta">
+                    <span id="answerTime"></span>
+                    <button class="btn-primary export-btn" onclick="exportQA()">
+                        📄 Export Q&A
                     </button>
                 </div>
-            </form>
-        </div>
-
-        <!-- Results Section -->
-        <div class="results-section hidden" id="resultsSection">
-            <div class="results-header">
-                <h3 class="results-title">
-                    <span id="resultsIcon">💡</span>
-                    <span id="resultsTitle">Query Results</span>
-                </h3>
-                <div class="results-meta">
-                    <div class="query-time">
-                        ⏱️ <span id="queryTime">--</span>
-                    </div>
-                    <div class="source-info">
-                        📚 <span id="sourceInfo">--</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="results-content" id="resultsContent">
-                <div class="no-results">
-                    <div class="no-results-icon">🔍</div>
-                    <p>No results yet. Ask a question to get started!</p>
-                </div>
             </div>
 
-            <!-- Source References (will be shown for document queries) -->
-            <div class="source-references" id="sourceReferences" style="display: none;">
-                <h4>📖 Source Documents</h4>
-                <div class="source-list" id="sourceList">
-                    <!-- Sources will be populated here -->
-                </div>
+            <div class="answer-content" id="answerContent">
+                <!-- Answer will be populated here -->
             </div>
         </div>
+    </div>
 
+    <!-- Citation Backdrop -->
+    <div class="citation-backdrop" id="citationBackdrop" style="display: none;"></div>
+
+    <!-- Citation Tooltip -->
+    <div class="citation-tooltip" id="citationTooltip" style="display: none;">
+        <div class="tooltip-header">
+            <span class="tooltip-title" id="tooltipTitle">Citation Details</span>
+            <button class="tooltip-close" id="closeTooltipBtn" aria-label="Close citation">×</button>
+        </div>
+        <div class="tooltip-content" id="tooltipContent">
+            <!-- Citation details will be populated here -->
+        </div>
+        <div class="tooltip-actions" id="tooltipActions">
+            <!-- Actions will be populated here -->
+        </div>
     </div>
 
     <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <p id="loadingText">Processing your question...</p>
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Processing your question...</p>
+            <p class="loading-description">Searching for the best answer using advanced RAG techniques</p>
+        </div>
     </div>
-
-    <!-- JavaScript -->
-    <script src="/js/auth.js"></script>
-
-    
-    <!-- Query Interface specific JavaScript -->
-    <script>
-        // Query Interface page specific functionality
-        let selectedQueryType = null;
-        let ragSystemStatus = {
-            isInitialized: false,
-            documentsCount: 0
-        };
-
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔍 Query Interface page loaded');
-            
-            // Initialize page
-            initializeQueryInterface();
-            
-            // Load user info
-            loadUserInfo();
-            
-            // Check RAG system status
-            checkRAGSystemStatus();
-        });
-
-        /**
-         * Initialize the query interface
-         */
-        function initializeQueryInterface() {
-            console.log('Initializing query interface...');
-            
-            // Set default query type to Wikipedia (always available)
-            selectQueryType('wikipedia');
-            
-            // Add example queries
-            addExampleQueries();
-            
-            // Show results section (initially hidden with no results message)
-            document.getElementById('resultsSection').classList.remove('hidden');
-        }
-
-        /**
-         * Load user information
-         */
-        function loadUserInfo() {
-            const username = localStorage.getItem('username') || 'User';
-            document.getElementById('username').textContent = username;
-        }
-
-        /**
-         * Check RAG system status from server
-         */
-        async function checkRAGSystemStatus() {
-            try {
-                // TODO: Replace with actual API call
-                // const response = await fetch('/api/rag/status');
-                // const status = await response.json();
-                
-                // Mock status check
-                const status = {
-                    isInitialized: Math.random() > 0.5, // Random for demo
-                    documentsCount: Math.floor(Math.random() * 5) + 1,
-                    selectedFiles: Math.floor(Math.random() * 3) + 1
-                };
-                
-                ragSystemStatus = status;
-                updateRAGStatusUI();
-                
-            } catch (error) {
-                console.error('Error checking RAG status:', error);
-                ragSystemStatus = { isInitialized: false, documentsCount: 0 };
-                updateRAGStatusUI();
-            }
-        }
-
-        /**
-         * Update RAG status indicators in UI
-         */
-        function updateRAGStatusUI() {
-            const docCard = document.getElementById('documentQueryCard');
-            const hybridCard = document.getElementById('hybridQueryCard');
-            const docIndicator = document.getElementById('docStatusIndicator');
-            const hybridIndicator = document.getElementById('hybridStatusIndicator');
-            const docStatusText = document.getElementById('docStatusText');
-            const hybridStatusText = document.getElementById('hybridStatusText');
-            const ragWarning = document.getElementById('ragWarning');
-
-            if (ragSystemStatus.isInitialized) {
-                // RAG system is initialized
-                docCard.classList.remove('disabled');
-                hybridCard.classList.remove('disabled');
-                
-                docIndicator.className = 'status-indicator';
-                hybridIndicator.className = 'status-indicator';
-                
-                docStatusText.textContent = `Ready (${ragSystemStatus.documentsCount} documents)`;
-                hybridStatusText.textContent = `Ready for hybrid search`;
-                
-                ragWarning.style.display = 'none';
-                
-            } else {
-                // RAG system not initialized
-                docCard.classList.add('disabled');
-                hybridCard.classList.add('disabled');
-                
-                docIndicator.className = 'status-indicator error';
-                hybridIndicator.className = 'status-indicator warning';
-                
-                docStatusText.textContent = 'RAG system not initialized';
-                hybridStatusText.textContent = 'Requires RAG initialization';
-                
-                // Show warning if documents or hybrid is selected
-                if (selectedQueryType === 'documents' || selectedQueryType === 'hybrid') {
-                    ragWarning.style.display = 'block';
-                    // Auto-switch to Wikipedia
-                    selectQueryType('wikipedia');
-                }
-            }
-        }
-
-        /**
-         * Select query type
-         */
-        function selectQueryType(type) {
-            // Remove selection from all cards
-            document.querySelectorAll('.query-type-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            // Don't allow selection of disabled options
-            if ((type === 'documents' || type === 'hybrid') && !ragSystemStatus.isInitialized) {
-                showMessage('Please initialize the RAG system first to query documents', 'warning');
-                return;
-            }
-            
-            // Select the chosen card
-            const cardId = type === 'documents' ? 'documentQueryCard' : 
-                          type === 'wikipedia' ? 'wikipediaQueryCard' : 'hybridQueryCard';
-            document.getElementById(cardId).classList.add('selected');
-            
-            selectedQueryType = type;
-            
-            // Update button text based on selection
-            updateQueryButtonText();
-            
-            // Hide/show RAG warning
-            const ragWarning = document.getElementById('ragWarning');
-            if ((type === 'documents' || type === 'hybrid') && !ragSystemStatus.isInitialized) {
-                ragWarning.style.display = 'block';
-            } else {
-                ragWarning.style.display = 'none';
-            }
-            
-            console.log('Query type selected:', type);
-        }
-
-        /**
-         * Update query button text based on selected type
-         */
-        function updateQueryButtonText() {
-            const buttonText = document.getElementById('queryButtonText');
-            const icons = {
-                documents: '📄',
-                wikipedia: '🌐',
-                hybrid: '🔄'
-            };
-            
-            const typeNames = {
-                documents: 'Documents',
-                wikipedia: 'Wikipedia',
-                hybrid: 'Hybrid Search'
-            };
-            
-            const icon = icons[selectedQueryType] || '🚀';
-            const typeName = typeNames[selectedQueryType] || '';
-            
-            buttonText.textContent = `${icon} Query ${typeName}`;
-        }
-
-        /**
-         * Add example queries to help users
-         */
-        function addExampleQueries() {
-            const queryInput = document.getElementById('queryInput');
-            
-            // Example queries for different types
-            const examples = {
-                documents: [
-                    "What are the main conclusions in the uploaded documents?",
-                    "Summarize the key findings from my files",
-                    "What methodology was used in the research?"
-                ],
-                wikipedia: [
-                    "What is artificial intelligence and how does it work?",
-                    "Explain the causes of climate change",
-                    "Who was Albert Einstein and what were his contributions?"
-                ],
-                hybrid: [
-                    "Compare the information in my documents with general knowledge about this topic",
-                    "How does my research align with current scientific understanding?",
-                    "What additional context does Wikipedia provide for this topic?"
-                ]
-            };
-            
-            // Add click handler to show examples
-            queryInput.addEventListener('focus', function() {
-                if (!this.value && selectedQueryType) {
-                    const typeExamples = examples[selectedQueryType] || examples.wikipedia;
-                    const randomExample = typeExamples[Math.floor(Math.random() * typeExamples.length)];
-                    this.placeholder = randomExample;
-                }
-            });
-        }
-
-        /**
-         * Handle query form submission
-         */
-        async function handleQuerySubmit(event) {
-            event.preventDefault();
-            
-            const queryInput = document.getElementById('queryInput');
-            const wordLengthInput = document.getElementById('wordLengthInput');
-            const submitBtn = document.getElementById('querySubmitBtn');
-            const spinner = document.getElementById('querySpinner');
-            const buttonText = document.getElementById('queryButtonText');
-            
-            const query = queryInput.value.trim();
-            const wordLength = parseInt(wordLengthInput.value) || 250;
-            
-            if (!query) {
-                showMessage('Please enter a question', 'error');
-                return;
-            }
-            
-            if (!selectedQueryType) {
-                showMessage('Please select a query type', 'error');
-                return;
-            }
-            
-            // Check if RAG is required but not initialized
-            if ((selectedQueryType === 'documents' || selectedQueryType === 'hybrid') && !ragSystemStatus.isInitialized) {
-                showMessage('Please initialize the RAG system first', 'error');
-                return;
-            }
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.classList.add('loading');
-            buttonText.style.display = 'none';
-            spinner.style.display = 'block';
-            
-            const startTime = Date.now();
-            
-            try {
-                // Perform the query
-                const result = await performQuery(query, selectedQueryType, wordLength);
-                
-                const endTime = Date.now();
-                const queryTime = ((endTime - startTime) / 1000).toFixed(2);
-                
-                // Display results
-                displayResults(result, queryTime);
-                
-            } catch (error) {
-                console.error('Query error:', error);
-                displayError('Failed to process your query. Please try again.');
-                
-            } finally {
-                // Reset button state
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
-                buttonText.style.display = 'block';
-                spinner.style.display = 'none';
-            }
-        }
-
-        /**
-         * Perform the actual query (mock implementation)
-         */
-        async function performQuery(query, type, wordLength) {
-            console.log(`Performing ${type} query:`, query);
-            
-            // TODO: Replace with actual API calls
-            // Different endpoints for different query types:
-            // - Documents: POST /api/rag/query
-            // - Wikipedia: POST /api/rag/wikipedia-query  
-            // - Hybrid: POST /api/rag/hybrid-query
-            
-            // Mock API delay
-            await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
-            
-            // Mock response based on query type
-            const responses = {
-                documents: {
-                    answer: `Based on your documents: ${query}\n\nThe documents show key findings and analysis relevant to your question. Main points include important insights and data-driven conclusions.`,
-                    sources: [
-                        { name: "Research_Paper.pdf", relevance: "High", page: 3 },
-                        { name: "Analysis_Report.pdf", relevance: "Medium", page: 7 }
-                    ],
-                    sourceType: "Your Documents"
-                },
-                wikipedia: {
-                    answer: `From Wikipedia: ${query}\n\nThis topic covers fundamental concepts and practical applications. Key information includes background context and current understanding in the field.`,
-                    sources: [
-                        { name: "Wikipedia Article", url: "https://en.wikipedia.org/wiki/example" }
-                    ],
-                    sourceType: "Wikipedia"
-                },
-                hybrid: {
-                    answer: `Combined answer for: ${query}\n\nYour documents provide specific insights that complement Wikipedia's general knowledge. This gives a comprehensive view of the topic.`,
-                    sources: [
-                        { name: "Research_Paper.pdf", relevance: "High", page: 3 },
-                        { name: "Wikipedia Article", url: "https://en.wikipedia.org/wiki/example" }
-                    ],
-                    sourceType: "Hybrid (Documents + Wikipedia)"
-                }
-            };
-            
-            return responses[type] || responses.wikipedia;
-        }
-
-        /**
-         * Display query results
-         */
-        function displayResults(result, queryTime) {
-            const resultsSection = document.getElementById('resultsSection');
-            const resultsIcon = document.getElementById('resultsIcon');
-            const resultsTitle = document.getElementById('resultsTitle');
-            const resultsContent = document.getElementById('resultsContent');
-            const queryTimeElement = document.getElementById('queryTime');
-            const sourceInfoElement = document.getElementById('sourceInfo');
-            const sourceReferences = document.getElementById('sourceReferences');
-            const sourceList = document.getElementById('sourceList');
-            
-            // Update results header
-            const icons = {
-                documents: '📄',
-                wikipedia: '🌐',
-                hybrid: '🔄'
-            };
-            
-            resultsIcon.textContent = icons[selectedQueryType] || '💡';
-            resultsTitle.textContent = `${result.sourceType} Results`;
-            
-            // Update meta information
-            queryTimeElement.textContent = `${queryTime}s`;
-            sourceInfoElement.textContent = result.sourceType;
-            
-            // Display answer
-            resultsContent.textContent = result.answer;
-            
-            // Show source references for document-based queries
-            if (result.sources && result.sources.length > 0) {
-                sourceList.innerHTML = result.sources.map(source => {
-                    if (source.url) {
-                        // Wikipedia source
-                        return `
-                            <div class="source-item">
-                                <strong>Wikipedia:</strong> ${source.name}
-                                <br><a href="${source.url}" target="_blank" style="color: var(--primary-color);">View Article</a>
-                            </div>
-                        `;
-                    } else {
-                        // Document source
-                        return `
-                            <div class="source-item">
-                                <strong>Document:</strong> ${source.name}
-                                <br>Relevance: ${source.relevance}, Page: ${source.page}
-                            </div>
-                        `;
-                    }
-                }).join('');
-                
-                sourceReferences.style.display = 'block';
-            } else {
-                sourceReferences.style.display = 'none';
-            }
-            
-            // Show results section
-            resultsSection.classList.remove('hidden');
-            
-            // Scroll to results
-            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
-            showMessage('Query completed successfully!', 'success');
-        }
-
-        /**
-         * Display error message
-         */
-        function displayError(errorMessage) {
-            const resultsContent = document.getElementById('resultsContent');
-            const sourceReferences = document.getElementById('sourceReferences');
-            
-            resultsContent.innerHTML = `
-                <div class="error-message">
-                    <strong>❌ Error:</strong> ${errorMessage}
-                </div>
-            `;
-            
-            sourceReferences.style.display = 'none';
-            
-            // Show results section
-            document.getElementById('resultsSection').classList.remove('hidden');
-            
-            showMessage(errorMessage, 'error');
-        }
-
-        /**
-         * Navigation functions
-         */
-        function goBackToDashboard() {
-            window.location.href = '/dashboard';
-        }
-
-        /**
-         * Logout functionality
-         */
-        function handleLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('username');
-                window.location.href = '/login?message=logout';
-            }
-        }
-
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(event) {
-            // Ctrl/Cmd + Enter to submit query
-            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-                const queryForm = document.querySelector('.query-form');
-                queryForm.dispatchEvent(new Event('submit'));
-            }
-        });
-
-        // Auto-save query in localStorage
-        document.getElementById('queryInput').addEventListener('input', function() {
-            localStorage.setItem('lastQuery', this.value);
-        });
-
-        // Restore last query on page load
-        window.addEventListener('load', function() {
-            const lastQuery = localStorage.getItem('lastQuery');
-            if (lastQuery) {
-                document.getElementById('queryInput').value = lastQuery;
-            }
-        });
-    </script>
 </body>
 </html>

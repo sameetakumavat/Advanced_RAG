@@ -476,3 +476,71 @@ body::after {
     background: var(--dark-bg);
     padding: 0 4px;
 }
+
+/* Password tips styling */
+.password-tips {
+    background: rgba(15, 15, 35, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.3s ease;
+}
+
+.tip-header {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.tip-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.tip-list li {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+    padding-left: 20px;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.tip-list li::before {
+    content: '❌';
+    position: absolute;
+    left: 0;
+    font-size: 12px;
+}
+
+.tip-list li.valid {
+    color: var(--secondary-color);
+}
+
+.tip-list li.valid::before {
+    content: '✅';
+}
+
+/* Password match indicator */
+.password-match {
+    color: var(--danger-color);
+    font-size: 13px;
+    margin-top: 6px;
+    animation: fadeIn 0.3s ease;
+}
+
+.password-match.valid {
+    color: var(--secondary-color);
+}
+
+/* Simple fade in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}

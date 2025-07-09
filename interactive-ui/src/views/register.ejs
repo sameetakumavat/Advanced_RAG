@@ -74,12 +74,39 @@
                         placeholder="Create a strong password"
                         required
                         autocomplete="new-password"
-                        minlength="6"
+                        minlength="8"
                     >
+                    <div class="password-tips" id="passwordTips" style="display: none;">
+                        <div class="tip-header">Password should:</div>
+                        <ul class="tip-list">
+                            <li data-requirement="length">Be at least 8 characters long</li>
+                            <li data-requirement="uppercase">Contain at least one uppercase letter</li>
+                            <li data-requirement="lowercase">Contain at least one lowercase letter</li>
+                            <li data-requirement="number">Contain at least one number</li>
+                            <li data-requirement="special">Contain at least one special character (@$!%*?&)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Confirm password input field -->
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="confirm_password" 
+                        name="confirm_password" 
+                        placeholder="Confirm your password"
+                        required
+                        autocomplete="new-password"
+                        minlength="8"
+                    >
+                    <div class="password-match" id="passwordMatch" style="display: none;">
+                        Passwords don't match
+                    </div>
                 </div>
                 
                 <!-- Register button -->
-                <button type="submit" class="btn-primary">
+                <button type="submit" class="btn-primary" id="registerButton">
                     Create Account
                 </button>
             </form>
@@ -107,6 +134,101 @@
     <!-- Interactive JavaScript -->
     <!-- Interactive JavaScript -->
     <script>
+        // Password validation functions
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
+            const passwordTips = document.getElementById('passwordTips');
+            const passwordMatch = document.getElementById('passwordMatch');
+            const registerButton = document.getElementById('registerButton');
+            
+            // Password requirements
+            const requirements = {
+                length: /.{8,}/,
+                uppercase: /[A-Z]/,
+                lowercase: /[a-z]/,
+                number: /[0-9]/,
+                special: /[@$!%*?&]/
+            };
+            
+            // Show password tips when user focuses on password field
+            passwordInput.addEventListener('focus', function() {
+                passwordTips.style.display = 'block';
+            });
+            
+            // Validate password as user types
+            passwordInput.addEventListener('input', function() {
+                const password = passwordInput.value;
+                
+                // Check each requirement
+                Object.keys(requirements).forEach(req => {
+                    const reqElement = document.querySelector(`[data-requirement="${req}"]`);
+                    if (requirements[req].test(password)) {
+                        reqElement.classList.add('valid');
+                    } else {
+                        reqElement.classList.remove('valid');
+                    }
+                });
+                
+                // If confirm password has value, check matching
+                if (confirmPasswordInput.value) {
+                    checkPasswordsMatch();
+                }
+            });
+            
+            // Check password match
+            function checkPasswordsMatch() {
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                if (confirmPassword) {
+                    passwordMatch.style.display = 'block';
+                    
+                    if (password === confirmPassword) {
+                        passwordMatch.textContent = 'Passwords match';
+                        passwordMatch.classList.add('valid');
+                    } else {
+                        passwordMatch.textContent = 'Passwords don\'t match';
+                        passwordMatch.classList.remove('valid');
+                    }
+                } else {
+                    passwordMatch.style.display = 'none';
+                }
+            }
+            
+            // Check passwords match when typing in confirm field
+            confirmPasswordInput.addEventListener('input', checkPasswordsMatch);
+            
+            // Hide password tips when user clicks outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.form-group')) {
+                    passwordTips.style.display = 'none';
+                }
+            });
+            
+            // Form submission validation
+            document.getElementById('registerForm').addEventListener('submit', function(event) {
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                // Check if all requirements are met
+                let allRequirementsMet = true;
+                Object.keys(requirements).forEach(req => {
+                    if (!requirements[req].test(password)) {
+                        allRequirementsMet = false;
+                    }
+                });
+                
+                // Check if passwords match
+                if (!allRequirementsMet || password !== confirmPassword) {
+                    event.preventDefault();
+                    showToast('Please fix the password issues before submitting', 'error');
+                    passwordTips.style.display = 'block';
+                    return false;
+                }
+            });
+        });
+    
         // Simple toast function
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');

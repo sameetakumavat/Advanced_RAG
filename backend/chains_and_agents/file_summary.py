@@ -1,4 +1,3 @@
-from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 from schemas.rag_models import SummarizeAnswer
 from prompt import SUMMARIZE_PROMPT

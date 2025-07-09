@@ -1,4 +1,3 @@
-import datetime
 from typing import Dict, Any
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from services.DataBaseConfig import Base

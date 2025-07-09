@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableParallel, RunnableLambda
 from schemas.rag_models import RagInput, CitedAnswer, RagResponse
