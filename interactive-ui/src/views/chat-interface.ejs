@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Interface - Advanced RAG System</title>
+    <title>Chat Interface - Smart Document Assistant</title>
     
     <!-- Favicon for branding -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
@@ -39,7 +39,7 @@
     <nav class="top-nav">
         <div class="nav-container">
             <div class="nav-brand">
-                <h1>🤖 Advanced RAG</h1>
+                <h1>🤖 Smart Document Assistant</h1>
             </div>
             <div class="nav-user">
                 <span class="welcome-text">Welcome, <span id="username">User</span>!</span>
@@ -65,7 +65,7 @@
                     </button>
                     <div class="rag-status" id="ragStatus">
                         <i class="fas fa-circle"></i>
-                        <span id="ragStatusText">Checking...</span>
+                        <span id="ragStatusText">Checking documents...</span>
                     </div>
                     <button class="action-btn end-chat-btn" onclick="showEndChatModal()" title="End Chat">
                         <i class="fas fa-power-off"></i> End Chat
@@ -73,12 +73,12 @@
                 </div>
             </div>
 
-            <!-- RAG Status Warning (shown if RAG not initialized) -->
+            <!-- Document Status Warning -->
             <div id="ragStatusWarning" class="status-alert" style="display: none;">
                 <i class="fas fa-exclamation-triangle"></i>
                 <div class="alert-content">
-                    <strong>Documents Not Initialized</strong>
-                    <p>Please upload and initialize your documents in the File Management section first before using the chat interface.</p>
+                    <strong>Documents Not Processed</strong>
+                    <p>Please upload and process your documents in the File Management section first before using the chat interface.</p>
                     
                     <div class="alert-actions">
                         <button class="btn-file-management" id="goToFileManagementBtn">

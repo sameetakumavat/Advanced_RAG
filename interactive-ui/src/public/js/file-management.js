@@ -384,11 +384,11 @@ async function initializeResources() {
                         clearInterval(statusCheckInterval);
                         initializeBtn.innerHTML = '✅ Initialized';
                         statusIndicator.className = 'status-indicator success';
-                        statusText.textContent = 'RAG Status: Ready';
-                        showToast('RAG resources initialized successfully!', 'success');
+                        statusText.textContent = 'Document Status: Ready';
+                        showToast('Documents processed successfully!', 'success');
                         
                         setTimeout(() => {
-                            initializeBtn.innerHTML = '🚀 Initialize RAG Resources';
+                            initializeBtn.innerHTML = '🚀 Prepare Documents for Smart Search';
                             initializeBtn.disabled = false;
                         }, 3000);
                         
@@ -398,11 +398,11 @@ async function initializeResources() {
                         initializeBtn.innerHTML = '❌ Failed';
                         initializeBtn.disabled = false;
                         statusIndicator.className = 'status-indicator error';
-                        statusText.textContent = 'RAG Status: Error';
-                        showToast(`Initialization failed: ${statusData.message}`, 'error');
+                        statusText.textContent = 'Document Status: Error';
+                        showToast(`Document processing failed: ${statusData.message}`, 'error');
                         
                         setTimeout(() => {
-                            initializeBtn.innerHTML = '🚀 Initialize RAG Resources';
+                            initializeBtn.innerHTML = '🚀 Prepare Documents for Smart Search';
                         }, 3000);
                     }
                     // If status is still 'initializing', continue polling
@@ -417,10 +417,10 @@ async function initializeResources() {
             clearInterval(statusCheckInterval);
             if (statusIndicator.className.includes('loading')) {
                 initializeBtn.innerHTML = '⏰ Timeout';
-                statusText.textContent = 'RAG Status: Timeout';
-                showToast('Initialization timeout. Please try again.', 'warning');
+                statusText.textContent = 'Document Status: Timeout';
+                showToast('Document processing timeout. Please try again.', 'warning');
                 setTimeout(() => {
-                    initializeBtn.innerHTML = '🚀 Initialize RAG Resources';
+                    initializeBtn.innerHTML = '🚀 Prepare Documents for Smart Search';
                     initializeBtn.disabled = false;
                 }, 3000);
             }
@@ -437,12 +437,12 @@ async function initializeResources() {
         initializeBtn.innerHTML = '❌ Failed';
         initializeBtn.disabled = false;
         statusIndicator.className = 'status-indicator error';
-        statusText.textContent = 'RAG Status: Error';
+        statusText.textContent = 'Document Status: Error';
         
-        showToast('Failed to start RAG initialization', 'error');
+        showToast('Failed to start document processing', 'error');
         
         setTimeout(() => {
-            initializeBtn.innerHTML = '🚀 Initialize RAG Resources';
+            initializeBtn.innerHTML = '🚀 Prepare Documents for Smart Search';
         }, 3000);
     }
 }
@@ -772,7 +772,7 @@ function formatDate(dateString) {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 }
 
-// Function to check RAG initialization status
+// Function to check document processing status
 async function checkRAGStatus() {
     try {
         const response = await fetch('/api/chain/status', {
@@ -786,21 +786,21 @@ async function checkRAGStatus() {
             const data = await response.json();
             if (data.initialized) {
                 statusIndicator.className = 'status-indicator success';
-                statusText.textContent = 'RAG Status: Ready';
+                statusText.textContent = 'Document Status: Ready';
             } else {
                 statusIndicator.className = 'status-indicator warning';
-                statusText.textContent = 'RAG Status: Not Initialized';
+                statusText.textContent = 'Document Status: Not Processed';
             }
         } else {
             statusIndicator.className = 'status-indicator error';
-            statusText.textContent = 'RAG Status: Unknown';
+            statusText.textContent = 'Document Status: Unknown';
         }
     } catch (error) {
-        console.error('Error checking RAG status:', error);
+        console.error('Error checking document status:', error);
         const statusIndicator = document.getElementById('statusIndicator');
         const statusText = document.getElementById('statusText');
         statusIndicator.className = 'status-indicator error';
-        statusText.textContent = 'RAG Status: Error';
+        statusText.textContent = 'Document Status: Error';
     }
 }
 

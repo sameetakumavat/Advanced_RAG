@@ -457,7 +457,7 @@ async function checkRagStatus() {
 }
 
 /**
- * Update RAG status UI
+ * Update document status UI
  */
 function updateRagStatusUI(isInitialized) {
     const ragStatusElement = document.getElementById('ragStatus');
@@ -468,7 +468,7 @@ function updateRagStatusUI(isInitialized) {
     if (ragStatusElement && ragStatusText) {
         if (isInitialized) {
             ragStatusElement.className = 'rag-status initialized';
-            ragStatusText.textContent = 'RAG Initialized';
+            ragStatusText.textContent = 'Documents Ready';
             
             if (ragStatusWarning) {
                 ragStatusWarning.style.display = 'none';

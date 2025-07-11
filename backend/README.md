@@ -1,6 +1,6 @@
-# Advanced RAG System - Backend
+# Smart Document Assistant - Backend
 
-This is the backend API for the Advanced RAG (Retrieval-Augmented Generation) system, built with FastAPI, LangChain and LangGraph. It manages authentication, document storage, and AI-powered question answering with citations.
+This is the backend API for the Smart Document Assistant, built with FastAPI, LangChain and LangGraph. It manages authentication, document storage, and AI-powered question answering with citations.
 
 ## Features
 
@@ -8,10 +8,10 @@ This is the backend API for the Advanced RAG (Retrieval-Augmented Generation) sy
 - **Authentication**: JWT-based secure authentication system with token management
 - **Database**: SQLite with SQLAlchemy ORM and Alembic migrations
 - **File Management**: Upload, list, select, and automatic summarization of PDF documents
-- **RAG Implementation**: Using LangChain, LangGraph agentic flows, FAISS vectorstore, HuggingFace embeddings, and Groq AI models for accurate retrieval
+- **Smart Search Implementation**: Using LangChain, LangGraph agentic flows, FAISS vectorstore, HuggingFace embeddings, and Groq AI models for accurate retrieval
 - **Wikipedia Integration**: Alternative knowledge source for questions outside document scope
-- **Graph-Based Agents**: LangGraph implementation for intelligent query routing and processing
-- **Conversational RAG**: Stateful chat sessions with context awareness and citation tracking
+- **Intelligent AI Agents**: LangGraph implementation for smart query routing and processing
+- **Conversational Assistant**: Stateful chat sessions with context awareness and citation tracking
 - **Session Management**: Multiple active chat sessions with history tracking
 
 ## Setup Instructions

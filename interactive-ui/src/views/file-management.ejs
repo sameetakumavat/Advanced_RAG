@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Management - Advanced RAG System</title>
+    <title>Document Management - Smart Document Assistant</title>
     
     <!-- Main stylesheet -->
     <link rel="stylesheet" href="/css/style.css">
@@ -14,7 +14,7 @@
     <nav class="top-nav">
         <div class="nav-container">
             <div class="nav-brand">
-                <h1>🤖 Advanced RAG</h1>
+                <h1>🤖 Smart Document Assistant</h1>
             </div>
             <div class="nav-user">
                 <span class="welcome-text">Welcome, <span id="username">User</span>!</span>
@@ -56,7 +56,7 @@
                 <div class="stat-icon">✅</div>
                 <div class="stat-info">
                     <h3 id="selectedFiles">0</h3>
-                    <p>Selected for RAG (Max 3)</p>
+                    <p>Selected for Smart Search (Max 3)</p>
                 </div>
             </div>
         </div>
@@ -68,11 +68,11 @@
             </div>
             <div class="action-right">
                 <button class="btn-warning" onclick="initializeResources()" id="initializeBtn" disabled>
-                    🚀 Initialize RAG Resources
+                    🚀 Prepare Documents for Smart Search
                 </button>
                 <div class="rag-status" id="ragStatus">
                     <span class="status-indicator" id="statusIndicator"></span>
-                    <span class="status-text" id="statusText">RAG Status: Unknown</span>
+                    <span class="status-text" id="statusText">Document Status: Unknown</span>
                 </div>
             </div>
         </div>

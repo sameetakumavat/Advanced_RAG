@@ -1,6 +1,6 @@
-# Advanced RAG System - Interactive UI
+# Smart Document Assistant - Interactive UI
 
-This is the user interface for the Advanced RAG (Retrieval-Augmented Generation) system, built with Express.js and EJS templating. It provides an intuitive, modern interface for interacting with the RAG backend, featuring glass morphism effects, responsive layout, and seamless document Q&A.
+This is the user interface for the Smart Document Assistant, built with Express.js and EJS templating. It provides an intuitive, modern interface for interacting with the AI-powered backend, featuring glass morphism effects, responsive layout, and seamless document Q&A.
 
 ## Features
 
@@ -13,7 +13,7 @@ This is the user interface for the Advanced RAG (Retrieval-Augmented Generation)
 - **Chat Interface**: Conversational interaction with documents including citation tracking
 - **Session Management**: Multiple persistent chat sessions with history saving
 - **Export Functionality**: Download conversation history to CSV format
-- **Real-time Status**: Live tracking of document indexing and processing
+- **Real-time Status**: Live tracking of document processing and smart search preparation
 - **Navigation Protection**: Prevent accidental loss of active chat sessions
 
 ## Project Structure

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QA Interface - Advanced RAG System</title>
+    <title>Q&A Interface - Smart Document Assistant</title>
     
     <!-- Favicon for branding -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
@@ -28,7 +28,7 @@
     <nav class="top-nav">
         <div class="nav-container">
             <div class="nav-brand">
-                <h1>🤖 Advanced RAG</h1>
+                <h1>🤖 Smart Document Assistant</h1>
             </div>
             <div class="nav-user">
                 <span class="welcome-text">Welcome, <span id="username">User</span>!</span>
@@ -69,7 +69,7 @@
                     </p>
                     <div class="qa-mode-status">
                         <div class="status-indicator" id="docStatusIndicator"></div>
-                        <span id="docStatusText">Checking RAG status...</span>
+                        <span id="docStatusText">Checking document status...</span>
                     </div>
                     <button class="qa-mode-btn" id="docQABtn" onclick="selectQAMode('documents')" disabled>
                         Select Mode
@@ -105,7 +105,7 @@
                     </p>
                     <div class="qa-mode-status">
                         <div class="status-indicator" id="hybridStatusIndicator"></div>
-                        <span id="hybridStatusText">Checking RAG status...</span>
+                        <span id="hybridStatusText">Checking document status...</span>
                     </div>
                     <button class="qa-mode-btn" id="hybridQABtn" onclick="selectQAMode('hybrid')" disabled>
                         Select Mode
@@ -113,13 +113,13 @@
                 </div>
             </div>
 
-            <!-- RAG Not Initialized Warning -->
+            <!-- Document Processing Warning -->
             <div class="warning-message" id="ragWarning" style="display: none;">
                 <div class="warning-content">
                     <span class="warning-icon">⚠️</span>
                     <div class="warning-text">
-                        <h4>RAG System Not Initialized</h4>
-                        <p>To query your documents or use hybrid search, please first upload files and initialize the RAG system.</p>
+                        <h4>Documents Not Processed Yet</h4>
+                        <p>To query your documents or use hybrid search, please first upload files and process them for smart search.</p>
                     </div>
                     <button class="btn-warning" onclick="goToFileManagement()">
                         Go to File Management
@@ -214,7 +214,7 @@
         <div class="loading-container">
             <div class="loading-spinner"></div>
             <p>Processing your question...</p>
-            <p class="loading-description">Searching for the best answer using advanced RAG techniques</p>
+            <p class="loading-description">Searching for the best answer using smart document analysis</p>
         </div>
     </div>
 </body>

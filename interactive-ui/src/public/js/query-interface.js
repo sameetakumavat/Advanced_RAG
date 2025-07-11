@@ -49,7 +49,7 @@ function loadUserInfo() {
 }
 
 /**
- * Check RAG system status
+ * Check document processing status
  */
 async function checkRAGStatus() {
     try {
@@ -65,18 +65,18 @@ async function checkRAGStatus() {
         if (response.ok) {
             ragStatus = await response.json();
         } else {
-            ragStatus = { initialized: false, message: "RAG resources not initialized" };
+            ragStatus = { initialized: false, message: "Documents not processed yet" };
         }
     } catch (error) {
-        console.error('Error checking RAG status:', error);
-        ragStatus = { initialized: false, message: "RAG resources not initialized" };
+        console.error('Error checking document status:', error);
+        ragStatus = { initialized: false, message: "Documents not processed yet" };
     }
 
     updateRAGStatusUI();
 }
 
 /**
- * Update RAG status in UI
+ * Update document status in UI
  */
 function updateRAGStatusUI() {
     const docStatusIndicator = document.getElementById('docStatusIndicator');
@@ -88,14 +88,14 @@ function updateRAGStatusUI() {
     const ragWarning = document.getElementById('ragWarning');
 
     if (ragStatus.initialized) {
-        // RAG is initialized
+        // Documents are processed and ready
         docStatusIndicator.className = 'status-indicator success';
-        docStatusText.textContent = 'RAG system ready';
+        docStatusText.textContent = 'Documents ready';
         docQABtn.disabled = false;
         docQABtn.textContent = 'Select Mode';
         
         hybridStatusIndicator.className = 'status-indicator success';
-        hybridStatusText.textContent = 'RAG system ready';
+        hybridStatusText.textContent = 'Documents ready';
         hybridQABtn.disabled = false;
         hybridQABtn.textContent = 'Select Mode';
         
@@ -122,7 +122,7 @@ function updateRAGStatusUI() {
 function selectQAMode(mode) {
     // Check if mode is available
     if ((mode === 'documents' || mode === 'hybrid') && !ragStatus.initialized) {
-        showToast('Please initialize RAG system first', 'warning');
+        showToast('Please process your documents first', 'warning');
         return;
     }
 
@@ -339,7 +339,7 @@ async function callRagAgentV1API(question, wordLength) {
     });
     
     if (!response.ok) {
-        throw new Error('Failed to get hybrid answer from RAG Agent');
+        throw new Error('Failed to get hybrid answer from Smart Document Assistant');
     }
     
     return await response.json();
@@ -568,7 +568,7 @@ function exportQA() {
     const mode = selectedQAMode;
     const timestamp = new Date().toLocaleString();
     
-    let exportContent = `Advanced RAG System - Q&A Export\n`;
+    let exportContent = `Smart Document Assistant - Q&A Export\n`;
     exportContent += `Generated on: ${timestamp}\n`;
     exportContent += `Mode: ${mode.charAt(0).toUpperCase() + mode.slice(1)}\n`;
     exportContent += `${'='.repeat(60)}\n\n`;
@@ -625,7 +625,7 @@ function exportQA() {
     
     exportContent += `\n${'='.repeat(60)}\n`;
     exportContent += `Export completed at: ${new Date().toLocaleString()}\n`;
-    exportContent += `Advanced RAG System - Document Analysis & Q&A\n`;
+    exportContent += `Smart Document Assistant - Document Analysis & Q&A\n`;
     
     // Create and download file
     const blob = new Blob([exportContent], { type: 'text/plain' });

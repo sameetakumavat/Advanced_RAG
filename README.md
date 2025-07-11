@@ -1,10 +1,10 @@
-# Advanced RAG System
+# Smart Document Assistant
 
-A Retrieval-Augmented Generation (RAG) system that enables AI-powered question answering over your documents with accurate citations.
+An AI-powered document assistant that enables intelligent question answering over your documents with accurate citations.
 
 ## Overview
 
-This project combines document processing, vector embeddings, and LLMs to provide precise answers to questions about uploaded documents. It features a FastAPI backend and a modern interactive UI frontend.
+This project combines advanced document processing, smart search technology, and AI language models to provide precise answers to questions about your uploaded documents. It features a FastAPI backend and a modern interactive UI frontend.
 
 ## Features
 
@@ -12,10 +12,10 @@ This project combines document processing, vector embeddings, and LLMs to provid
 - **Secure Authentication**: JWT-based user management system
 - **Dashboard**: User statistics and system status monitoring
 - **Background Processing**: Asynchronous document indexing with status tracking
-- **Advanced RAG with Citations**: Get precise answers with references to source documents
+- **Smart Search with Citations**: Get precise answers with references to source documents
 - **Multi-Source Knowledge**: Query both documents and Wikipedia
-- **Graph-Based Agent Architecture**: Using LangGraph for robust, modular workflows
-- **Conversational RAG**: Chat mode with context awareness and history summarization
+- **Advanced AI Architecture**: Using intelligent workflows for reliable responses
+- **Conversational Assistant**: Chat mode with context awareness and history summarization
 - **Single-Shot and Chat Modes**: Choose between direct questions or continuous conversation
 - **Adaptive Query Routing**: Intelligent routing to the right knowledge source
 - **File Summarization**: Automatic generation of document summaries
@@ -53,7 +53,7 @@ This project combines document processing, vector embeddings, and LLMs to provid
 
 The project is organized into two main components:
 
-- **Backend**: FastAPI server handling authentication, document processing, and RAG operations
+- **Backend**: FastAPI server handling authentication, document processing, and smart search operations
 - **Interactive UI**: Modern Node.js/Express frontend with responsive design and intuitive interfaces
 
 ## Current Development Status
@@ -156,27 +156,6 @@ The Advanced RAG System uses a modern architecture with clear separation between
 - **EJS**: Templating engine for dynamic content
 - **Modern CSS**: Glass morphism effects and responsive design
 - **Proxy Integration**: Seamless API communication
-
-## Screenshots
-
-<div align="center">
-  <p><i>Login Screen</i></p>
-  <img src="screenshots/login.png" alt="Login Screen" width="600"/>
-  
-  <p><i>Dashboard</i></p>
-  <img src="screenshots/dashboard.png" alt="Dashboard" width="600"/>
-  
-  <p><i>Chat Interface</i></p>
-  <img src="screenshots/chat.png" alt="Chat Interface" width="600"/>
-</div>
-
-## Acknowledgements
-
-- **LangChain**: Core RAG implementation framework
-- **LangGraph**: For agentic workflow structure
-- **Groq**: For fast LLM inference 
-- **FastAPI**: Backend API framework
-- **Express.js**: Frontend server framework
 
 ## Author
 

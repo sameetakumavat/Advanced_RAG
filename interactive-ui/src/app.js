@@ -82,6 +82,6 @@ app.get('/chat-interface', (req, res) => {
 // Start the server
 const PORT = process.env.PORT || 3000; // Use the port from environment variables or default to 3000
 app.listen(PORT, () => {
-    console.log(`🚀 Advanced RAG Auth Server is running on port ${PORT}`); // Log message indicating server is running
+    console.log(`🚀 Smart Document Assistant Server is running on port ${PORT}`); // Log message indicating server is running
     console.log(`📱 Access the application at: http://localhost:${PORT}`);
 });

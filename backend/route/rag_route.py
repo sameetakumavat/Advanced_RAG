@@ -112,7 +112,11 @@ def ask_documents(user: user_dependency, input_data: RagInput):
     try:
         response = rag_chain.invoke(input_data)
         mapped_citations = resource_service.map_citations_to_metadata(response.citations)
-        
+        if response.answer in ["I don't know based on the provided information", "I don't know"]:
+            return {
+                "answer": "I don't know based on the provided information so either use wikipedia mode or hybrid mode.",
+                "citations": []
+            }
         return {
             "answer": response.answer,
             "citations": mapped_citations
